@@ -231,7 +231,7 @@
             map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
             // 그뭐냐 그거 포인트정보 불러오기
-            loadDivePointData()
+            loadDivePointData();
 
         }
 
@@ -336,39 +336,143 @@
         // API 데이터 로드
         function loadDivePointData() {
             fetch('/Home/GetDivePointData')
-                .then(response => response.json())
-                .then(data => {
-                    addMarkers(data);
+                .then(response => {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        return response.json();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(`서버 응답이 JSON이 아닙니다: ${text}`);
+                        });
+                    }
                 })
-                .catch(error => console.error('Error:', error));
+                .then(data => {
+                    console.log('받은 데이터:', data);
+                    if (Array.isArray(data) && data.length > 0) {
+                        addMarkers(data);
+                        // 첫 번째 마커 위치로 지도 중심 이동
+                        const firstItem = data[0];
+                        const moveLatLng = new kakao.maps.LatLng(firstItem.lat, firstItem.lot);
+                        map.setCenter(moveLatLng);
+                        map.setLevel(10);
+                    } else {
+                        console.warn('데이터가 비어있거나 배열이 아닙니다:', data);
+                        const infoPanel = document.getElementById('infoPanel');
+                        if (infoPanel) {
+                            infoPanel.innerHTML = '<div class="info">표시할 데이터가 없습니다.</div>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const infoPanel = document.getElementById('infoPanel');
+                    if (infoPanel) {
+                        infoPanel.innerHTML = `<div class="error">데이터 로드 실패: ${error.message}</div>`;
+                    }
+                });
         }
 
-        // 마커 추가 함수
+        // 마커 추가 함수 (중복 위치 처리 및 상세 정보 개선)
         function addMarkers(items) {
+            if (!Array.isArray(items)) {
+                console.error('items가 배열이 아닙니다:', items);
+                return;
+            }
+
+            // 중복 위치 제거 및 데이터 그룹화
+            const locationMap = new Map();
+
             items.forEach(item => {
-                const markerPosition = new kakao.maps.LatLng(item.lat, item.lot);
+                const key = `${item.lat}_${item.lot}`;
+                if (!locationMap.has(key)) {
+                    locationMap.set(key, {
+                        lat: item.lat,
+                        lot: item.lot,
+                        skscExpcnRgnNm: item.skscExpcnRgnNm,
+                        data: []
+                    });
+                }
+                locationMap.get(key).data.push(item);
+            });
+
+            // 각 위치별로 마커 생성
+            locationMap.forEach(location => {
+                const markerPosition = new kakao.maps.LatLng(location.lat, location.lot);
 
                 const marker = new kakao.maps.Marker({
                     position: markerPosition,
-                    title: item.skscExpcnRgnNm
+                    title: location.skscExpcnRgnNm
                 });
 
+                // 상세 정보가 포함된 인포윈도우 내용 생성
+                let infoContent = `<div style="padding:15px; min-width:280px; max-height:400px; overflow-y:auto;">
+                                    <h4 style="margin:0 0 10px 0; color:#007bff;">${location.skscExpcnRgnNm}</h4>`;
+
+                // 날짜별로 정렬
+                location.data.sort((a, b) => {
+                    const dateA = new Date(a.predcYmd + ' ' + (a.predcNoonSeCd === '오전' ? '06:00' : '18:00'));
+                    const dateB = new Date(b.predcYmd + ' ' + (b.predcNoonSeCd === '오전' ? '06:00' : '18:00'));
+                    return dateA - dateB;
+                });
+
+                location.data.forEach((item, index) => {
+                    const statusColor = getStatusColor(item.totalIndex);
+                    infoContent += `
+                        <div style="margin-bottom:10px; padding:8px; border-left:4px solid ${statusColor}; background-color:#f8f9fa;">
+                            <div style="font-weight:bold; margin-bottom:5px;">
+                                ${item.predcYmd} ${item.predcNoonSeCd}
+                            </div>
+                            <div style="font-size:13px; line-height:1.4;">
+                                🌊 파고: ${item.minWvhgt}m ~ ${item.maxWvhgt}m<br>
+                                🌡️ 수온: ${item.minWtem}℃ ~ ${item.maxWtem}℃<br>
+                                📊 상태: <span style="color:${statusColor}; font-weight:bold;">${item.totalIndex}</span>
+                                ${item.lastScr ? `<br>⭐ 점수: ${item.lastScr}점` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                infoContent += `</div>`;
+
                 const infowindow = new kakao.maps.InfoWindow({
-                    content: `<div style="padding:10px;">
-                                <strong>${item.skscExpcnRgnNm}</strong><br>
-                                파고: ${item.minWvhgt}m ~ ${item.maxWvhgt}m<br>
-                                수온: ${item.minWtem}℃ ~ ${item.maxWtem}℃
-                              </div>`
+                    content: infoContent,
+                    removable: true // X 버튼으로 닫을 수 있게
                 });
 
                 marker.setMap(map);
 
                 // 마커 클릭 시 인포윈도우 열기
-                kakao.maps.event.addListener(marker, 'click', function() {
+                kakao.maps.event.addListener(marker, 'click', function () {
+                    // 다른 인포윈도우 닫기
+                    if (window.currentInfoWindow) {
+                        window.currentInfoWindow.close();
+                    }
                     infowindow.open(map, marker);
+                    window.currentInfoWindow = infowindow;
+                });
+
+                // 마커 호버 효과 (선택사항)
+                kakao.maps.event.addListener(marker, 'mouseover', function () {
+                    marker.setOpacity(0.7);
+                });
+
+                kakao.maps.event.addListener(marker, 'mouseout', function () {
+                    marker.setOpacity(1.0);
                 });
             });
         }
+
+        // 상태에 따른 색상 반환 함수
+        function getStatusColor(status) {
+            switch (status) {
+                case '매우좋음': return '#28a745';
+                case '좋음': return '#17a2b8';
+                case '보통': return '#ffc107';
+                case '나쁨': return '#fd7e14';
+                case '매우나쁨': return '#dc3545';
+                default: return '#6c757d';
+            }
+        }
+
 
 
 

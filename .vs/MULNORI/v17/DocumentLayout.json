@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "D:\\C#\\MULNORI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|d:\\c#\\mulnori\\mulnori\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{AB7FE3C5-A44F-CDD9-F6B2-768C0EB8E535}|MULNORI\\MULNORI.csproj|solutionrelative:mulnori\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\C#\\DHTEST\\DHTEST\\Controllers\\HomeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -62,13 +74,52 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\C#\\MULNORI\\MULNORI\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "MULNORI\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\C#\\MULNORI\\MULNORI\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "MULNORI\\Controllers\\HomeController.cs",
+              "ViewState": "AQIAAF0AAAAAAAAAAAAAAGAAAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-16T13:59:58.864Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\C#\\MULNORI\\MULNORI\\appsettings.json",
+              "RelativeDocumentMoniker": "MULNORI\\appsettings.json",
+              "ToolTip": "D:\\C#\\MULNORI\\MULNORI\\appsettings.json",
+              "RelativeToolTip": "MULNORI\\appsettings.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAABrAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-06-16T12:54:48.026Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\C#\\MULNORI\\MULNORI\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "MULNORI\\appsettings.Development.json",
+              "ToolTip": "D:\\C#\\MULNORI\\MULNORI\\appsettings.Development.json",
+              "RelativeToolTip": "MULNORI\\appsettings.Development.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAADAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-06-16T12:54:28.337Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": ".gitignore",
               "DocumentMoniker": "D:\\C#\\MULNORI\\MULNORI\\.gitignore",
               "RelativeDocumentMoniker": "MULNORI\\.gitignore",
               "ToolTip": "D:\\C#\\MULNORI\\MULNORI\\.gitignore",
               "RelativeToolTip": "MULNORI\\.gitignore",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAAAD0AAAAAAAAAAAAAAA==",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAF8SURBVDhPjVNLTgJBEG1lwpoFB3GNK9fieA48hD8iwT/ihwgSDAIHgAGXXsEV18CNzL/LquqZdsYM6kteXqcy3fWqpmpNRBgOhyABBEgpAFVKPIMUcYzUyOU\u002BXM/b2qtU3vkSfRjjZTCAMAw1A2LwzdFoBPP5HNqdzuL27n4juibWI\u002BUshBA1DIkhEx9iEorFotgslQqGYbxxAGFEqt1MxmPWJLbLZdZ\u002Bv89q5PMFPiTR6z2zdaxR0fXA0XTBcVywkb4fwHXjRteecIDNQ7UmExVYAdPcxYaqclN46na5WenMKjtlVnTYwcXlVYaDqImW9beD5N/TeGy32QHXm6hZ03ZgiSQHp2fnWQ4oBmJqWSqwAqZpZjt4aLXAD4J0VqyZsmoubfB8H2r1eoaD6NXZ9HcHO\u002BSA3f4AjifXl8rItOETM8ckB9WTWpYD9RdeZ1PWVWAHWXPQaDb59f/w8LiqHeh1pvGkCaP6qB8yXusoxmuNZ7XmII4O9vGuEF86osuDYRkpYQAAAABJRU5ErkJggg==",
+              "ViewState": "AQIAABUAAAAAAAAAAAAAABkAAAAKAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-06-16T07:49:13.31Z",
               "EditorCaption": ""
             },
@@ -80,14 +131,14 @@
               "RelativeDocumentMoniker": "MULNORI\\VIews\\Home\\Index.cshtml",
               "ToolTip": "D:\\C#\\MULNORI\\MULNORI\\VIews\\Home\\Index.cshtml",
               "RelativeToolTip": "MULNORI\\VIews\\Home\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAASAAAAAAAAAA==",
+              "ViewState": "AQIAAEsBAAAAAAAAAAAswF0BAAAvAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-06-16T07:35:14.275Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "Privacy.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\Privacy.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\Privacy.cshtml",
@@ -99,7 +150,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "Error.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\Error.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\Error.cshtml",
@@ -111,7 +162,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\_ViewStart.cshtml",
@@ -123,7 +174,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 9,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\_ViewImports.cshtml",
@@ -135,7 +186,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 10,
               "Title": "DivePointModel.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Models\\DivePointModel.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Models\\DivePointModel.cs",
@@ -147,7 +198,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 11,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\Index.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\Index.cshtml",
@@ -159,7 +210,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 12,
               "Title": "ErrorViewModel.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Models\\ErrorViewModel.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Models\\ErrorViewModel.cs",
@@ -171,7 +222,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Controllers\\HomeController.cs",
@@ -182,7 +233,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 13,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Program.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Program.cs",
@@ -194,7 +245,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 14,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\VIews\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\VIews\\Home\\Index.cshtml",
@@ -206,7 +257,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 15,
               "Title": "Index.cshtml.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\VIews\\Home\\Index.cshtml.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\VIews\\Home\\Index.cshtml.cs",
@@ -218,7 +269,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\appsettings.json",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\appsettings.json",
@@ -230,7 +281,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 17,
               "Title": "Index.cshtml.cs",
               "DocumentMoniker": "D:\\C#\\DHTEST\\DHTEST\\Pages\\Index.cshtml.cs",
               "RelativeDocumentMoniker": "..\\DHTEST\\DHTEST\\Pages\\Index.cshtml.cs",

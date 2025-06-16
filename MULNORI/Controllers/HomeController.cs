@@ -77,22 +77,56 @@ namespace SeaConditionWeb.Controllers
             {
                 var apiUrl = "https://apis.data.go.kr/1192136/fcstSkinScuba/GetFcstSkinScubaApiService";
 
+                var serviceKey = _configuration["openApi:ServiceKey"];
+
+                if (string.IsNullOrEmpty(serviceKey)) 
+                {
+                    return Json(new { success = false, message = "API 키가 없거나 올바르지 않습니다" });
+                }
+
                 var parameters = new Dictionary<string, string>
-            {
-                {"ServiceKey", _configuration["OpenApi:ServiceKey"]},
-                {"numOfRows", "100"},
-                {"pageNo", "1"},
-                {"resultType", "json"}
-            };
+                {
+                    {"serviceKey", serviceKey},
+                    {"type","json"},
+                    {"reqDate",System.DateTime.Now.ToString("yyyyMMddHH")},
+                    {"numOfRows", "100"},
+                    {"pageNo", "1"}
+                };
 
                 using var client = new HttpClient();
-                var response = await client.GetAsync($"{apiUrl}?{new FormUrlEncodedContent(parameters).ReadAsStringAsync().Result}");
+                var queryString = string.Join("&", parameters.Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value)}"));
+                var finalUrl = $"{apiUrl}?{queryString}";
+
+                Console.WriteLine($"요청 URL: {finalUrl}");
+                var response = await client.GetAsync(finalUrl);
+                var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<JsonElement>(json);
-                    var items = JsonSerializer.Deserialize<List<DivePointModel>>(result.GetProperty("response").GetProperty("body").GetProperty("items").GetProperty("item").ToString());
+                    var items = result
+                        .GetProperty("response")
+                        .GetProperty("body")
+                        .GetProperty("items")
+                        .GetProperty("item")
+                        .EnumerateArray()
+                        .Select(item => new
+                        {
+                            skscExpcnRgnNm = item.GetProperty("skscExpcnRgnNm").GetString(),
+                            lat = item.GetProperty("lat").GetDouble(),
+                            lot = item.GetProperty("lot").GetDouble(),
+                            predcYmd = item.GetProperty("predcYmd").GetString(),
+                            predcNoonSeCd = item.GetProperty("predcNoonSeCd").GetString(),
+                            minWvhgt = item.GetProperty("minWvhgt").GetString(),
+                            maxWvhgt = item.GetProperty("maxWvhgt").GetString(),
+                            minWtem = item.GetProperty("minWtem").GetString(),
+                            maxWtem = item.GetProperty("maxWtem").GetString(),
+                            totalIndex = item.GetProperty("totalIndex").GetString(),
+                            lastScr = item.GetProperty("lastScr").GetDouble()
+                        })
+                        .ToList();
+                
                     return Json(items);
                 }
                 return BadRequest("데이터를 가져오는데 실패했습니다.");
