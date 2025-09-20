@@ -58,6 +58,7 @@ app.listen(port, () => {
  *                   type: string
  *                   example: 500 error
  */
+
 app.get('/api/Get_DivePoint_V1', async (req: Request, res: Response) => {
     const { pageNo = '1', numOfRows = '10' } = req.query;
     const apiKey = process.env.OPENAPI_DIVE_API_KEY;
@@ -86,24 +87,25 @@ app.get('/api/Get_DivePoint_V1', async (req: Request, res: Response) => {
     });
 
     try {
+    
         const response = await axios.get(`${apiUrl}?${params.toString()}`);
-        const result = response.data;
+        const result = response.data; 
 
         //실제 데이터 영역
         const dataSection = result?.response?.body?.items?.item;
 
         let itemArrays: DivePoint[] = [];
 
-        if (dataSection){
+        if (dataSection){ 
             const itemsArray = Array.isArray(dataSection) ? dataSection : [dataSection];
-
+                
           itemArrays = itemsArray.map((item, index) => ({
                       id: index,
                       skscExpcnRgnNm: item.skscExpcnRgnNm,
                       lat: parseFloat(item.lat),
                       lot: parseFloat(item.lot),
-                      predcYmd: item.predcYmd,
-                      predcNoonSeCd: item.predcNoonSeCd,
+                      predcYmd: `${item.predcYmd} (${new Date(item.predcYmd).toLocaleDateString('ko-KR', { weekday: 'short' })})`,
+                      predcNoonSeCd: item.predcNoonSeCd === '일' ? '' : item.predcNoonSeCd, //먼 미래는 오전 오후 '일' 로만 들어와서 예외처리 
                       tdlvHrCn: '',
                       minWvhgt: item.minWvhgt,
                       maxWvhgt: item.maxWvhgt,
@@ -112,8 +114,15 @@ app.get('/api/Get_DivePoint_V1', async (req: Request, res: Response) => {
                       totalIndex: item.totalIndex,
                       lastScr: parseFloat(item.lastScr)
                      }));
+          itemArrays.sort((a, b) => {
+            const dateCompare = a.predcYmd.localeCompare(b.predcYmd);
+            if (dateCompare !== 0) {
+              return dateCompare;
+            }
+            return a.predcNoonSeCd.localeCompare(b.predcNoonSeCd);
+          });
         }
-
+    
         res.json(itemArrays);
 
     } catch (error: any) {

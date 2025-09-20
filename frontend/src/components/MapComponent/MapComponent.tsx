@@ -51,39 +51,72 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
             default: return '#6c757d';
         }
     };
-
+  
     const addMarkers = (points: DivePoint[]) => {
-
         if (!map) return;
 
+        // 이전에 생성된 마커 제거
         markers.forEach(marker => marker.setMap(null));
 
-        const newMarkers = points.map(point => {
-            const markerPosition = new window.kakao.maps.LatLng(point.lat, point.lot);
+        //절대값인 위도, 경도값으로 그룹핑하기. 포인트명으로 하면 중복될 수가 있음...
+        const locationMap = new Map<string, { lat: number; lot: number; skscExpcnRgnNm: string; data: DivePoint[] }>();
+
+        points.forEach(point => {
+            const key = `${point.lat}_${point.lot}`;
+            if (!locationMap.has(key)) {
+                locationMap.set(key, {
+                    lat: point.lat,
+                    lot: point.lot,
+                    skscExpcnRgnNm: point.skscExpcnRgnNm,
+                    data: []
+                });
+            }
+            locationMap.get(key)!.data.push(point);
+        });
+
+        const newMarkers = Array.from(locationMap.values()).map(location => {
+            const markerPosition = new window.kakao.maps.LatLng(location.lat, location.lot);
+            
             const marker = new window.kakao.maps.Marker({
                 position: markerPosition,
-                title: point.skscExpcnRgnNm
+                title: location.skscExpcnRgnNm
             });
 
-            let infoContent = `<div style="margin-bottom:10px; padding:8px; border-`
-            let statusColor = getStatusColor(point.totalIndex);
+            //날짜, 오전, 오후로 정렬하기. 백엔드에서 정렬해주지만 혹시 모른다.
+            location.data.sort((a, b) => {
+                const dateA_str = a.predcYmd.split(' ')[0];
+                const dateB_str = b.predcYmd.split(' ')[0];
+                const dateA = new Date(`${dateA_str} ${a.predcNoonSeCd === '오전' ? '06:00' : '18:00'}`);
+                const dateB = new Date(`${dateB_str} ${b.predcNoonSeCd === '오전' ? '06:00' : '18:00'}`);
+                return dateA.getTime() - dateB.getTime();
+            });
+
+            let infoContent = `<div style="padding:15px; min-width:280px; max-height:400px; overflow-y:auto;">
+                                <h4 style="margin:0 0 10px 0; color:#007bff;">${location.skscExpcnRgnNm}</h4>`;
+
+            location.data.forEach(item => {
+                const statusColor = getStatusColor(item.totalIndex);
                 infoContent += `
-                                <div style="margin-bottom:10px; padding:8px; border-left:4px solid ${statusColor}; background-color:#f8f9fa;">
-                                    <div style="font-weight:bold; margin-bottom:5px;">
-                                        ${point.predcYmd} ${point.predcNoonSeCd}
-                                    </div>
-                                    <div style="font-size:13px; line-height:1.4;">
-                                        🌊 파고: ${point.minWvhgt}m ~ ${point.maxWvhgt}m<br>
-                                        🌡️ 수온: ${point.minWtem}℃ ~ ${point.maxWtem}℃<br>
-                                        📊 상태: <span style="color:${statusColor}; font-weight:bold;">${point.totalIndex}</span>
-                                        ${point.lastScr ? `<br>⭐ 점수: ${point.lastScr}점` : ''}
-                                    </div>
-                                </div>`;
+                    <div style="margin-bottom:10px; padding:8px; border-left:4px solid ${statusColor}; background-color:#f8f9fa;">
+                        <div style="font-weight:bold; margin-bottom:5px;">
+                            ${item.predcYmd} ${item.predcNoonSeCd}
+                        </div>
+                        <div style="font-size:13px; line-height:1.4;">
+                            🌊 파고: ${item.minWvhgt}m ~ ${item.maxWvhgt}m<br>
+                            🌡️ 수온: ${item.minWtem}℃ ~ ${item.maxWtem}℃<br>
+                            📊 상태: <span style="color:${statusColor}; font-weight:bold;">${item.totalIndex}</span>
+                            ${item.lastScr ? `<br>⭐ 점수: ${item.lastScr}점` : ''}
+                        </div>
+                    </div>`;
+            });
+            infoContent += `</div>`;
 
             const infowindow = new window.kakao.maps.InfoWindow({
                 content: infoContent,
                 removable: true
             });
+
+            marker.setMap(map);
 
             window.kakao.maps.event.addListener(marker, 'click', function () {
                 if (window.currentInfoWindow) {
@@ -93,7 +126,15 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 window.currentInfoWindow = infowindow;
             });
 
-            marker.setMap(map);
+            /*마커에 포인터가 올라오면 투명도 변경시켜주기*/
+            window.kakao.maps.event.addListener(marker, 'mouseover', function () {
+                marker.setOpacity(0.7);
+            });
+
+            window.kakao.maps.event.addListener(marker, 'mouseout', function () {
+                marker.setOpacity(1.0);
+            });
+
             return marker;
         });
 
@@ -103,9 +144,10 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const loadDivePointData = async (page: number) => {
         try {
             const response = await fetch(`/api/Get_DivePoint_V1?pageNo=${page}`);
+
             const data: DivePoint[] = await response.json();
 
-            if (data && data.length > 0) {
+            if (data && data.length > 0) { 
                 if (page === 1) {
                     // 페이지 로드시 포인트 중 첫 페이지만 호출
                     setDivePoints(data); 
@@ -172,6 +214,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         }
     }, [divePoints, map]);
 
+    //이게 그 버튼 눌렀을때 동작을 정의하는거야
     const handleLoadMore = () => {
         setCurrentPage(prevPage => prevPage + 1);
     };
