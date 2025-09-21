@@ -18,14 +18,9 @@ setupSwagger(app);
 
 AppDataSource.initialize().then(() => {
 
-    console.log('디비연결합니다');
-    app.listen(port, () => {
-      console.log(`Server is running on http://localhost:${port}`);
-    });
-
 }).catch((err) => {
     console.error("DB Init Error", err);
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1);
 });
 
 /**
