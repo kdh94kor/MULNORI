@@ -4,18 +4,28 @@ import express, { Application, Request, Response } from 'express';
 import axios from 'axios';
 import { DivePoint } from './src/entity/DivePoint';
 import { setupSwagger } from './swagger';
+import { AppDataSource } from './src/data-source'; // Added import
+import { DivePointMst } from './src/entity/DivePointMst';
 
 dotenv.config();
 
-const app: Application = express();
+export const app: Application = express();
 const port: number = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json());
 
 setupSwagger(app);
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+AppDataSource.initialize().then(() => {
+
+    console.log('디비연결합니다');
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+
+}).catch((err) => {
+    console.error("DB Init Error", err);
+    process.exit(1); // Exit if DB connection fails
 });
 
 /**
@@ -131,6 +141,82 @@ app.get('/api/Get_DivePoint_V1', async (req: Request, res: Response) => {
             console.error('ERR status', error.response.status);
         }
         res.status(500).json({ error: '데이터 조회 실패ㅠ' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/Set_DivePointMst_V1:
+ *   post:
+ *     summary: 새로운 다이빙 포인트 등록 요청
+ *     description: 등록 요청된 다이빙 포인트를 등록합니다.
+ *     tags: [DivePointMst]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:            
+ *               pointName:
+ *                 type: string
+ *                 format: string
+ *                 description: 포인트명
+ *                 example: 하조대전망대
+ *               lat:
+ *                 type: number
+ *                 format: double
+ *                 description: 위도
+ *                 example: 37.5665
+ *               lot:
+ *                 type: number
+ *                 format: double
+ *                 description: 경도 (프론트엔드의 lng)
+ *                 example: 126.9780
+ *     responses:
+ *       '201':
+ *         description: 다이빙 포인트가 정상적으로 등록되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: DivePoint saved successfully
+ *                 divePoint:
+ *                   $ref: '#/components/schemas/DivePointMst'
+ *       '400':
+ *         description: 필수 필드가 누락되었거나 데이터 형식이 올바르지 않습니다.
+ *       '500':
+ *         description: 서버 오류.
+ */
+app.post('/api/Set_DivePointMst_V1', async (req: Request, res: Response) => {
+    try {
+        const {lat, lot, pointName, tags } = req.body;
+
+       console.log(`포인트명 : ${pointName}, 위도경도 :(${lat}/${lot}, 태그 :${tags})`);
+
+        if (!lat || !lot || !pointName ) {
+            return res.status(400).json({ message: '필요한 항목이 모두 입력되지 않았습니다.'} );
+        }
+
+        const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
+        const newDivePoint = new DivePointMst();
+
+        newDivePoint.pointName = pointName;
+        newDivePoint.lat = lat;
+        newDivePoint.lot = lot;
+        newDivePoint.tags = tags;
+
+        console.log(`포인트명 : ${newDivePoint.pointName}, 위도경도 :(${newDivePoint.lat}/${newDivePoint.lot}, 태그 :${newDivePoint.tags})`);
+        await divePointMstRepo.save(newDivePoint);
+
+        res.status(201).json({ message: '다이빙 포인트가 정상적으로 등록되었습니다.', divePoint: newDivePoint });
+
+    } catch (error: any) {
+        console.error('저장 오류:', error);
+        res.status(500).json({ message: '다이빙 포인트 저장 중 오류 발생', error: error.message });
     }
 });
 
