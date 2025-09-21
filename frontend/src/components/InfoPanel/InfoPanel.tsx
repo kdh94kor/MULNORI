@@ -19,8 +19,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ seaConditionData, loading, error 
             return <div className={styles.info}>표시할 데이터가 없습니다.</div>;
         }
 
-        // Assuming seaConditionData has properties like temperature, waveHeight, etc.
-        // This structure comes from the original displayMenuData function in Index.cshtml
+    
         return (
             <>
                 <h3>실시간 바다 상황</h3>
