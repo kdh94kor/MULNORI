@@ -20,7 +20,7 @@ AppDataSource.initialize().then(() => {
 
 }).catch((err) => {
     console.error("DB Init Error", err);
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1);
 });
 
 /**
