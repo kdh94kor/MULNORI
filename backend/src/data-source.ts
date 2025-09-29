@@ -1,9 +1,11 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { DivePoint } from "./entity/divePoint";
+import { DivePoint } from "./entity/DivePoint";
+import { DivePointMst } from "./entity/DivePointMst";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -12,9 +14,9 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  synchronize: true, // 개발 환경에서만 사용, 프로덕션에서는 migration 사용
+  synchronize: true, 
   logging: false,
-  entities: [DivePoint],
+  entities: [DivePoint, DivePointMst],
   migrations: [],
   subscribers: [],
 });

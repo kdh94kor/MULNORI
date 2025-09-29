@@ -47,6 +47,11 @@ body {
     margin: 20px 0;
 }
 
+.menuLink {
+    text-decoration: none;
+    color: inherit;
+}
+
 .menuItem {
     padding: 15px 20px;
     cursor: pointer;

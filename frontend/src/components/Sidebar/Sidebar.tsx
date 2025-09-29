@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styles from '../MainLayout/MainLayout.module.css'; // Reusing MainLayout's styles for now
 
 interface SidebarProps {
@@ -18,14 +19,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMen
                 </button>
             </div>
             <ul className={styles.menuList}>
-                <li
-                    className={`${styles.menuItem} ${activeMenuItem === 'realtime' ? styles.active : ''}`}
-                    onClick={() => onMenuItemClick('realtime')}
-                    data-menu="realtime"
-                >
-                    <span className={styles.menuIcon}>🌊</span>
-                    <span className={styles.menuText}>실시간 바다 상황</span>
-                </li>
+                <Link to="/" className={styles.menuLink}>
+                    <li
+                        className={`${styles.menuItem} ${activeMenuItem === 'realtime' ? styles.active : ''}`}
+                        onClick={() => onMenuItemClick('realtime')}
+                        data-menu="realtime"
+                    >
+                        <span className={styles.menuIcon}>🌊</span>
+                        <span className={styles.menuText}>실시간 바다 상황</span>
+                    </li>
+                </Link>
+                <Link to="/board" className={styles.menuLink}>
+                    <li
+                        className={`${styles.menuItem} ${activeMenuItem === 'buddy' ? styles.active : ''}`}
+                        onClick={() => onMenuItemClick('buddy')}
+                        data-menu="buddy"
+                    >
+                        <span className={styles.menuIcon}>🕵️‍♀️</span>
+                        <span className={styles.menuText}>버디구해요</span>
+                    </li>
+                </Link>
                 <li
                     className={`${styles.menuItem} ${activeMenuItem === 'settings' ? styles.active : ''}`}
                     onClick={() => onMenuItemClick('settings')}
