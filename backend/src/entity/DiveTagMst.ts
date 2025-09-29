@@ -10,7 +10,7 @@ export class DiveTagMst {
   name!: string; // 태그명
 
   @Column() 
-  type!: string; // 태그타입
+  tagtype!: string; // 태그타입
 
   // @OneToMany(() => DivePointMst, (divePoint) => divePoint.tags)
   // divePoints!: DivePointMst[];
