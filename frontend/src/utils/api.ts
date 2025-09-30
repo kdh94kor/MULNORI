@@ -26,3 +26,48 @@ export const fetchSeaConditionData = async (menuType: string) => {
         return { success: false, message: `api서버 오류: ${error.message}` };
     }
 };
+
+// 게시판 카테고리 불러오기
+export const fetchCategories = async () => {
+    try {
+        const response = await fetch('/categories');
+        if (!response.ok) {
+            throw new Error(response.status + '');
+        }
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('불러오기 오류', error);
+        return { success: false, message: `카테고리 불러오기 오류: ${error.message}` };
+    }
+};
+
+// 게시판 목록 불러오기
+export const fetchBoardList = async () => {
+    try {
+        const response = await fetch('/get_board_list/v1');
+        if (!response.ok) {
+            throw new Error(response.status + '');
+        }
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('게시판 목록 불러오기 오류', error);
+        return { success: false, message: `게시판 목록 불러오기 오류: ${error.message}` };
+    }
+};
+
+// DivePointMst 데이터 불러오기
+export const fetchDivePointMst = async () => {
+    try {
+        const response = await fetch('/api/Get_DivePointMst_V1');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('DivePointMst 데이터를 불러오는 중 오류가 발생했습니다.', error);
+        return { success: false, message: error.message };
+    }
+};

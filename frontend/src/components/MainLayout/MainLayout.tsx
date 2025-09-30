@@ -4,7 +4,11 @@ import Sidebar from '../Sidebar/Sidebar';
 import MapComponent from '../MapComponent/MapComponent';
 import { fetchSeaConditionData } from '../../utils/api'; 
 
-const MainLayout: React.FC = () => {
+interface MainLayoutProps {
+    children?: React.ReactNode;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
     //사이드바 토글
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -53,17 +57,21 @@ const MainLayout: React.FC = () => {
 
             {/* 상단 */}
             <div className={styles.mainContent}>
-                <div className={styles.contentHeader}>
-                    <h1>아맞다 바다날씨</h1>
-                    <p>실시간 해양 정보를 확인하고 관리할 수 있습니다.</p>
-                </div>
-                {/* 카카오 맵 지도 영역 */}
-                <MapComponent
-                    kakaoMapKey={KAKAO_MAP_KEY}
-                    seaConditionData={seaConditionData}
-                    infoPanelLoading={infoPanelLoading}
-                    infoPanelError={infoPanelError}
-                />
+                {children || (
+                    <>
+                        <div className={styles.contentHeader}>
+                            <h1>아맞다 바다날씨</h1>
+                            <p>실시간 해양 정보를 확인하고 관리할 수 있습니다.</p>
+                        </div>
+                        {/* 카카오 맵 지도 영역 */}
+                        <MapComponent
+                            kakaoMapKey={KAKAO_MAP_KEY}
+                            seaConditionData={seaConditionData}
+                            infoPanelLoading={infoPanelLoading}
+                            infoPanelError={infoPanelError}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );

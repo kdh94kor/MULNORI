@@ -3,8 +3,10 @@ import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 import { DivePoint } from "./entity/DivePoint";
 import { DivePointMst } from "./entity/DivePointMst";
+import path from "path";
 
-dotenv.config();
+
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 export const AppDataSource = new DataSource({
   type: "postgres",

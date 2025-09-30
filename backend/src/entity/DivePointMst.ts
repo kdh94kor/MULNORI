@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-
 @Entity("M_DivePointMst")
 export class DivePointMst {
     
@@ -20,4 +19,3 @@ export class DivePointMst {
     tags!: string;
 
 }
-
