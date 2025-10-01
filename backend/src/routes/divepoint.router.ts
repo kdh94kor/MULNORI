@@ -77,35 +77,4 @@ router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
     }
 });
 
-/**
- * @swagger
- * /Get_DivePointMst_V1:
- *   get:
- *     summary: 저장된 다이빙 포인트 마스터 정보 조회
- *     description: 데이터베이스에 저장된 모든 다이빙 포인트 마스터 정보를 조회합니다.
- *     tags: [DivePointMst]
- *     responses:
- *       '200':
- *         description: 성공. 다이빙 포인트 마스터 정보 배열을 반환합니다.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/DivePointMst'
- *       '500':
- *         description: 서버 오류.
- */
-router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
-    try {
-        const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
-        const divePoints = await divePointMstRepo.find();
-        res.json(divePoints);
-        
-    } catch (error: any) {
-        console.error('조회 오류:', error);
-        res.status(500).json({ message: '다이빙 포인트 조회 중 오류 발생', error: error.message });
-    }
-});
-
 export default router;
