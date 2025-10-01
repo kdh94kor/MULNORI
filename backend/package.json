@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "ts-node server.ts",
+    "start": "ts-node start.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
