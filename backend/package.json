@@ -2,7 +2,7 @@
   "name": "mulnori",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/start.js",
   "scripts": {
     "start": "ts-node start.ts",
     "build": "tsc",
