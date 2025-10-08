@@ -108,4 +108,89 @@ router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * @swagger
+ * /Delete_DivePointMstTag_V1/{id}:
+ *   delete:
+ *     summary: 다이빙 포인트 태그 삭제
+ *     description: 특정 다이빙 포인트에서 지정된 태그를 삭제합니다.
+ *     tags: [DivePointMst]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 다이빙 포인트의 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tagToDelete:
+ *                 type: string
+ *                 description: 삭제할 태그 이름
+ *                 example: 바다
+ *     responses:
+ *       '200':
+ *         description: 태그가 성공적으로 삭제되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Tag deleted successfully
+ *                 divePoint:
+ *                   $ref: '#/components/schemas/DivePointMst'
+ *       '400':
+ *         description: 요청 본문에 tagToDelete가 누락되었거나 유효하지 않습니다.
+ *       '404':
+ *         description: 해당 ID의 다이빙 포인트를 찾을 수 없거나 삭제할 태그를 찾을 수 없습니다.
+ *       '500':
+ *         description: 서버 오류.
+ */
+router.delete('/Delete_DivePointMstTag_V1/:id', async (req: Request, res: Response) => {
+    try {
+        const pointId = parseInt(req.params.id, 10);
+        const { tagToDelete } = req.body;
+
+        if (isNaN(pointId)) {
+            return res.status(400).json({ message: '유효하지 않은 포인트 ID입니다.' });
+        }
+
+        if (!tagToDelete) {
+            return res.status(400).json({ message: '삭제할 태그 이름이 필요합니다.' });
+        }
+
+        const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
+        const divePoint = await divePointMstRepo.findOneBy({ id: pointId });
+
+        if (!divePoint) {
+            return res.status(404).json({ message: '해당 ID의 다이빙 포인트를 찾을 수 없습니다.' });
+        }
+
+        let tagsArray = divePoint.tags ? divePoint.tags.split(',').map(tag => tag.trim()) : [];
+        const initialLength = tagsArray.length;
+
+        tagsArray = tagsArray.filter(tag => tag !== tagToDelete);
+
+        if (tagsArray.length === initialLength) {
+            return res.status(404).json({ message: '삭제할 태그를 찾을 수 없습니다.' });
+        }
+
+        divePoint.tags = tagsArray.join(',');
+        await divePointMstRepo.save(divePoint);
+
+        res.status(200).json({ message: '태그가 성공적으로 삭제되었습니다.', divePoint: divePoint });
+
+    } catch (error: any) {
+        console.error('태그 삭제 중 오류 발생:', error);
+        res.status(500).json({ message: '태그 삭제 중 서버 오류 발생', error: error.message });
+    }
+});
+
 export default router;

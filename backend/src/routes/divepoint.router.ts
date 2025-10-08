@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { DivePointMst } from '../entity/DivePointMst';
+import { DivePoint } from '../entity/DivePoint';
+import axios from 'axios';
 
 const router = Router();
 
