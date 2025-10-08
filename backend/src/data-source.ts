@@ -7,6 +7,7 @@ import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
 import { Board } from "./entity/Board";
 import path from "path";
 
+
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 export const AppDataSource = new DataSource({

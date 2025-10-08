@@ -356,6 +356,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         }
     }, [divePoints, divePointMsts, map, dataError]);
 
+    //이게 그 버튼 눌렀을때 동작을 정의하는거야
     const handleLoadMore = () => {
         setCurrentPage(prevPage => prevPage + 1);
     };
