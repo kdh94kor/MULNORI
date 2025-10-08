@@ -42,10 +42,25 @@ export const fetchCategories = async () => {
     }
 };
 
+// 특정 상위 카테고리의 하위 카테고리 불러오기
+export const fetchCategoriesByParent = async (parentName: string) => {
+    try {
+        const response = await fetch(`/api/categories/children/${encodeURIComponent(parentName)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('하위 카테고리 불러오기 오류', error);
+        return { success: false, message: `하위 카테고리 불러오기 오류: ${error.message}` };
+    }
+};
+
 // 게시판 목록 불러오기
 export const fetchBoardList = async () => {
     try {
-        const response = await fetch('/get_board_list/v1');
+        const response = await fetch('/api/get_board_list_V1');
         if (!response.ok) {
             throw new Error(response.status + '');
         }
@@ -71,3 +86,50 @@ export const fetchDivePointMst = async () => {
         return { success: false, message: error.message };
     }
 };
+
+// 새 게시글 등록
+export const createPost = async (postData: { title: string; content: string; categoryId: number; author: string; }) => {
+    try {
+        const response = await fetch('/api/post_board_V1', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'JSON 파싱 오류' }));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('게시글 등록 오류', error);
+        return { success: false, message: error.message };
+    }
+};
+
+// 게시글 읽어오기
+export const getContent = async(id: string) => {
+    
+    try {
+
+        const response = await fetch(`/api/get_board_content_v1/${id}`);
+
+        if (!response.ok){
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message);
+        }
+        
+        const data = await response.json();
+        return {success: true, data};
+
+    } catch (error: any) {
+        console.log('게시글 조회 실패 ',error);
+        return { success: false, message: error.message};
+    }
+
+
+} ;

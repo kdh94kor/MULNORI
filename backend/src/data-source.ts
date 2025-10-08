@@ -5,6 +5,8 @@ import { DivePoint } from "./entity/DivePoint";
 import { DivePointMst } from "./entity/DivePointMst";
 import { TagApproval } from "./entity/TagApproval";
 import { TagDeletionRequest } from "./entity/TagDeletionRequest";
+import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
+import { Board } from "./entity/Board";
 import path from "path";
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
@@ -18,7 +20,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true, 
   logging: false,
-  entities: [DivePoint, DivePointMst, TagApproval, TagDeletionRequest],
+  entities: [DivePoint, DivePointMst, TagApproval, TagDeletionRequest, Board, BoardCategoryMaster],
   migrations: [],
   subscribers: [],
 });

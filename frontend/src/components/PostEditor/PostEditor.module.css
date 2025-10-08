@@ -1,0 +1,56 @@
+.editorContainer {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.editorContainer h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.formGroup select,
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Important for 100% width */
+}
+
+.buttonGroup {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.buttonGroup button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.submitButton {
+  background-color: #3498db;
+  color: white;
+}
+
+.cancelButton {
+  background-color: #e0e0e0;
+  color: #333;
+}
