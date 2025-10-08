@@ -47,12 +47,12 @@ interface ContextMenuState {
     x: number;
     y: number;
     lat: number;
-    lng: number;
+    lot: number;
 }
 
 interface AddDivePoint {
     lat: number;
-    lng: number;
+    lot: number;
     pointName: string;
     tags: string[];
 }
@@ -68,10 +68,10 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const [dataError, setMapNotice] = useState<string | null>(null);
 
     // --- 포인트 등록 관련 상태 ---
-    const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, lat: 0, lng: 0 });
+    const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, lat: 0, lot: 0 });
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [pointName, setPointName] = useState('');
-    const [pointCoords, setPointCoords] = useState<{ lat: number; lng: number } | null>(null);
+    const [pointCoords, setPointCoords] = useState<{ lat: number; lot: number } | null>(null);
     const [tags, setTags] = useState<string[]>([]);
     const [currentTag, setCurrentTag] = useState('');
 
@@ -254,7 +254,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const addDivePointData = async (pointData: AddDivePoint) =>{
         
         try{
-            const response = await fetch(`/api/Set_DivePoint_V1`, {
+            const response = await fetch(`/api/Set_DivePointMst_V1`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -263,11 +263,17 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '포인트 등록 실패ㅠ');
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const error = await response.json();
+                    errorMessage = error.message || '포인트 등록 실패ㅠ';
+                } catch (e) {
+                    // 응답이 JSON이 아닐 경우를 대비
+                }
+                throw new Error(errorMessage);
             }
 
-            const result = await response.json();
+            await response.json();
 
             return true;
 
@@ -302,7 +308,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                                 x: mouseEvent.point.x,
                                 y: mouseEvent.point.y,
                                 lat: latlng.getLat(),
-                                lng: latlng.getLng(),
+                                lot: latlng.getLng(),
                             });
                         });
 
@@ -357,13 +363,13 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     // --- 포인트 등록 관련 핸들러 ---
     const handleOpenForm = () => {
         // 폼 열 때 모든 관련 상태 초기화
-        setPointCoords({ lat: contextMenu.lat, lng: contextMenu.lng });
+        setPointCoords({ lat: contextMenu.lat, lot: contextMenu.lot });
 
         setIsFormOpen(true);
         setPointName('');
         setTags([]);
         setCurrentTag('');
-        setContextMenu({ visible: false, x: 0, y: 0, lat: 0, lng: 0 }); // 메뉴 닫기
+        setContextMenu({ visible: false, x: 0, y: 0, lat: 0, lot: 0 }); // 메뉴 닫기
 
     };
 
@@ -382,11 +388,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         try{
             const newPointData: AddDivePoint = {
                 lat: pointCoords.lat,
-                lng: pointCoords.lng,
+                lot: pointCoords.lot,
                 pointName: pointName,
                 tags: tags
             };
-            
+            console.log(`${newPointData.lat},${newPointData.lot},${newPointData.pointName},${newPointData.tags}`);
             await addDivePointData(newPointData);
 
             alert('🎉포인트 등록이 요청이 정상적으로 완료되었습니다!🎉\n\n🤲담당자 검토 후 반영됩니다!🤲');
@@ -464,7 +470,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                             </div>
                             <div style={inputGroupStyle}>
                                 <label>경도</label>
-                                <input type="text" readOnly value={pointCoords.lng.toFixed(6)} style={readOnlyInputStyle} />
+                                <input type="text" readOnly value={pointCoords.lot.toFixed(6)} style={readOnlyInputStyle} />
                             </div>
                             <div style={inputGroupStyle}>
                                 <label htmlFor="pointName">포인트 이름</label>

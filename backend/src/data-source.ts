@@ -3,6 +3,8 @@ import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 import { DivePoint } from "./entity/DivePoint";
 import { DivePointMst } from "./entity/DivePointMst";
+import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
+import { Board } from "./entity/Board";
 import path from "path";
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
@@ -16,7 +18,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true, 
   logging: false,
-  entities: [DivePoint, DivePointMst],
+  entities: [DivePoint, DivePointMst, Board, BoardCategoryMaster],
   migrations: [],
   subscribers: [],
 });
