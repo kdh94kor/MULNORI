@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import styles from '../MainLayout/MainLayout.module.css';
 import InfoPanel from '../InfoPanel/InfoPanel';
 import { fetchDivePointMst } from '../../utils/api';
+import InfoWindowContent from './InfoWindowContent';
+import ReactDOM from 'react-dom/client';
+
 
 //DivePoint entity와는 구조를 다르게 가자
 interface DivePoint {
@@ -25,6 +28,7 @@ interface DivePointMst {
     lot: number;
     pointName: string;
     tags: string;
+    recommendationCount: number
 }
 
 declare global {
@@ -67,6 +71,9 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const [currentPage, setCurrentPage] = useState(1);
     const [dataError, setMapNotice] = useState<string | null>(null);
 
+    const [markerInfoWindows, setMarkerInfoWindows] = useState<Map<number, { marker: any, infowindow: any }>>(new Map());
+    const [openInfoWindowPointId, setOpenInfoWindowPointId] = useState<number | null>(null);
+
     // --- 포인트 등록 관련 상태 ---
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, lat: 0, lot: 0 });
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -86,6 +93,63 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         }
     };
   
+    const handleTagDelete = async (pointId: number, tagToDelete: string) => {
+        try {
+            const response = await fetch(`/api/Delete_DivePointMstTag_V1/${pointId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tagToDelete }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '태그 삭제 실패');
+            }
+
+            // If backend deletion is successful, update frontend state
+            setDivePointMsts(prevMsts =>
+                prevMsts.map(point =>
+                    point.id === pointId
+                        ? { ...point, tags: point.tags.split(',').filter(tag => tag.trim() !== tagToDelete).join(',') }
+                        : point
+                )
+            );
+            alert('태그가 성공적으로 삭제되었습니다.');
+
+        } catch (error: any) {
+            console.error('태그 삭제 중 오류 발생:', error);
+            alert(`태그 삭제 실패: ${error.message}`);
+        }
+    };
+
+    const handleTagAdd = async (pointId: number, newTag: string) => {
+        try {
+            const response = await fetch('/api/tags/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    divePointId: pointId,
+                    tagName: newTag,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || '태그 추가 요청에 실패했습니다.');
+            }
+
+            alert(result.message);
+
+        } catch (error: any) {
+            console.error('Error requesting tag addition:', error);
+            alert(error.message);
+        }
+    };
     const addMarkers = (points: DivePoint[], divePointMsts: DivePointMst[]) => {
         if (!map || !window.kakao || !window.kakao.maps) return;
 
@@ -184,17 +248,25 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                         image: markerImage
                     });
 
-                    let infoContent = `<div style="padding:15px; min-width:250px;">
-                                        <h4 style="margin:0 0 10px 0; color:#dc3545;">${point.pointName}</h4>
-                                        <div style="font-size:13px; line-height:1.6;">
-                                            ${point.tags ? `<strong>#태그:</strong> ${point.tags}<br>` : ''} 
-                                            <em style="color:#6c757d;">(000님 추천 포인트)</em>
-                                        </div>
-                                   </div>`;
+                    const iwContent = document.createElement('div');
+                    iwContent.style.padding = '0'; // Remove default padding if any
+
+                    // Render the React component into the div
+                    // Using ReactDOM.render for older React versions, or createRoot().render for React 18+
+                    // Assuming React 17 or earlier for now, if React 18, it would be createRoot(iwContent).render(...)
+                    const root = ReactDOM.createRoot(iwContent);
+                    root.render(
+                        <InfoWindowContent point={point} onTagDelete={handleTagDelete} onTagAdd={handleTagAdd} />
+                    );
 
                     const infowindow = new window.kakao.maps.InfoWindow({
-                        content: infoContent,
+                        content: iwContent, // Pass the DOM element directly
                         removable: true
+                    });
+
+                    // Add event listener to unmount the React component when infowindow closes
+                    window.kakao.maps.event.addListener(infowindow, 'close', function() {
+                        root.unmount();
                     });
 
                     marker.setMap(map);
