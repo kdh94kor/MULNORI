@@ -8,6 +8,7 @@ import { TagDeletionRequest } from "./entity/TagDeletionRequest";
 import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
 import { Board } from "./entity/Board";
 import path from "path";
+import * as fs from 'fs';
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
@@ -23,4 +24,8 @@ export const AppDataSource = new DataSource({
   entities: [DivePoint, DivePointMst, TagApproval, TagDeletionRequest, Board, BoardCategoryMaster],
   migrations: [],
   subscribers: [],
+  ssl: { 
+    // rejectUnauthorized: false
+     ca: fs.readFileSync(process.env.PEM_LOCATE).toString(), 
+  }
 });

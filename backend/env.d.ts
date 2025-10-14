@@ -8,6 +8,7 @@ declare global {
         API_KEY: string;
         KAKAOMAP_API_KEY: string;
         OPENAPI_DIVE_API_KEY: string;
+        PEM_LOCATE: string;
       }
     }
   }
