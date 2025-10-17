@@ -8,8 +8,12 @@ const router = Router();
 router.get('/get_board_list_V1', async (req, res) => {
     try {
         const boardRepo = AppDataSource.getRepository(Board);
-        const boardList = await boardRepo.find({ relations: ["category"] }); // Add relation
-
+        const boardList = await boardRepo.find({ 
+            relations: ["category"],
+            order: {
+                id: "DESC"
+            } });
+        
         res.json(boardList);
     } catch (error) {
         res.status(500).send({ message: "게시판 목록 불러오기 오류", error });
@@ -17,12 +21,11 @@ router.get('/get_board_list_V1', async (req, res) => {
 });
 
 router.post('/post_board_V1', async (req, res) => {
-    // Add author to destructuring
+    
     const { title, content, categoryId, author } = req.body;
 
-    // Add author to validation
     if (!title || !content || !categoryId || !author) {
-        return res.status(400).send({ message: "게시글 제목, 내용, 모집유형, 작성자가 모두 입력되어야 합니다." });
+        return res.status(400).send({ message: "게시글 제목, 내용, 모집유형, 작성자를 모두 입력해 주세요." });
     }
 
     const boardRepo = AppDataSource.getRepository(Board);
@@ -38,9 +41,9 @@ router.post('/post_board_V1', async (req, res) => {
 
         const newBoard = new Board();
         newBoard.title = title;
-        newBoard.content = content; // Add content
+        newBoard.content = content; 
         newBoard.category = category;
-        newBoard.author = author; // Add author
+        newBoard.author = author;
         newBoard.views = 0;
         newBoard.likes = 0;
 

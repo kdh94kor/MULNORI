@@ -373,6 +373,26 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                         });
                         setMap(kakaoMap);
 
+                        // 카카오맵 최종 로드 후 데이터 뿌리도록 수정
+                        window.kakao.maps.event.addListener(kakaoMap, 'idle', function listener() {
+
+                            loadDivePointData(1);
+                            
+                            // 사용자 등록 포인트 API
+                            const loadMstData = async () => {
+                                const result = await fetchDivePointMst();
+                                if (result.success) {
+                                    setDivePointMsts(result.data);
+                                } else {
+                                    setMapNotice(result.message || '사용자 등록 포인트를 불러오는 중 오류가 발생했습니다.');
+                                }
+                            };
+                            loadMstData();
+
+                            // 핸들러 삭제
+                            window.kakao.maps.event.removeListener(kakaoMap, 'idle', listener);
+                        });
+
                         window.kakao.maps.event.addListener(kakaoMap, 'rightclick', (mouseEvent: any) => {
                             const latlng = mouseEvent.latLng;
                             setContextMenu({
@@ -400,7 +420,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         };
     }, [kakaoMapKey]);
 
-    useEffect(() => {
+        useEffect(() => {
         if (map) {
             loadDivePointData(1);
             const loadMstData = async () => {
@@ -423,7 +443,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
 
     //alert창으로 에러를 표시하다보니 페이지가 아예 깨져버리는 문제로 notice 추가 
     useEffect(() => {
-        if(map && !dataError) {
+        if(map) {
             addMarkers(divePoints, divePointMsts);
         }
     }, [divePoints, divePointMsts, map, dataError]);
