@@ -15,6 +15,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
     const [activeMenuItem, setActiveMenuItem] = useState<string | null>(null);
     const [seaConditionData, setSeaConditionData] = useState<any>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     /*포인트 정보 관련*/
     const [infoPanelLoading, setInfoPanelLoading] = useState(false);
@@ -27,6 +28,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     };
 
     const handleMenuItemClick = async (menuType: string) => {
+        if (activeMenuItem === menuType) {
+            setRefreshKey(prevKey => prevKey + 1);
+        }
 
         setActiveMenuItem(menuType);
         setInfoPanelLoading(true);
@@ -57,7 +61,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             {/* 상단 */}
             <div className={styles.mainContent}>
-                {children || (
+                {children ? (
+                    React.cloneElement(children as React.ReactElement, { key: refreshKey })
+                ) : (
                     <>
                         <div className={styles.contentHeader}>
                             <h1>아맞다 바다날씨</h1>
