@@ -26,6 +26,7 @@ export const AppDataSource = new DataSource({
   subscribers: [],
   ssl: { 
     // rejectUnauthorized: false
-     ca: fs.readFileSync(process.env.PEM_LOCATE).toString(), 
+    //  ca: fs.readFileSync(process.env.PEM_LOCATE).toString(), 
+    ca: fs.readFileSync(path.join(__dirname, '..', 'ap-southeast-2-bundle.pem')).toString(),
   }
 });
