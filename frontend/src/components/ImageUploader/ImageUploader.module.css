@@ -1,0 +1,30 @@
+.uploaderContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 500px;
+}
+
+.fileInput {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.previewContainer {
+    margin-top: 1rem;
+}
+
+.previewImage {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 0.9rem;
+}
