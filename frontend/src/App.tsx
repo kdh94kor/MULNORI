@@ -4,6 +4,7 @@ import MainLayout from './components/MainLayout/MainLayout';
 import BuddyBoard from './components/BuddyBoard/BuddyBoard';
 import PostDetail from './components/PostDetail/PostDetail'; // PostDetail 임포트
 import ImageUploader from './components/ImageUploader/ImageUploader'; // ImageUploader 임포트
+import ApprovalDashboard from './components/ApprovalDashboard/ApprovalDashboard';
 
 function App() {
 
@@ -29,6 +30,8 @@ function App() {
           </MainLayout>
         } 
       />
+
+      <Route path="/settings" element={<MainLayout><ApprovalDashboard /></MainLayout>} />
     </Routes>
   );
 }
