@@ -133,3 +133,27 @@ export const getContent = async(id: string) => {
 
 
 } ;
+
+// 이미지 업로드
+export const uploadImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || '이미지 업로드에 실패했습니다.');
+        }
+
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('이미지 업로드 오류:', error);
+        return { success: false, message: error.message };
+    }
+};
