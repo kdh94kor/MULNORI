@@ -43,11 +43,11 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
     }, [isAddingTag]);
 
     return (
-        <div style={{ padding: '15px', minWidth: '250px' }}>
+        <div style={{ padding: '15px', width: '260px', display: 'flex', flexDirection: 'column' }}>
             <h4 style={{ margin: '0 0 10px 0', color: '#dc3545' }}>{point.pointName}</h4>
-            <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+            <div style={{ fontSize: '13px', lineHeight: '1.6', display: 'flex', flexDirection: 'column' }}>
                 {tagsArray.length > 0 && (
-                    <div style={{ marginTop: '5px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '5px', marginBottom: '10px', width: '100%' }}>
                         {tagsArray.map((tag, index) => (
                             <span
                                 key={index}
@@ -58,8 +58,6 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
                                     color: '#333',
                                     padding: '3px 8px',
                                     borderRadius: '12px',
-                                    marginRight: '5px',
-                                    marginBottom: '5px',
                                     fontSize: '12px',
                                 }}
                             >

@@ -1,0 +1,83 @@
+.dashboardContainer {
+    padding: 20px;
+    background-color: #f4f6f8;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.requestTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.requestTable th,
+.requestTable td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.requestTable th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #495057;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status.pending {
+    background-color: #ffc107; /* Yellow */
+}
+
+.status.approved {
+    background-color: #28a745; /* Green */
+}
+
+.status.rejected {
+    background-color: #dc3545; /* Red */
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.actionBtn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.actionBtn:hover {
+    opacity: 0.8;
+}
+
+.approve {
+    background-color: #28a745;
+}
+
+.pend {
+    background-color: #17a2b8;
+}
+
+.reject {
+    background-color: #dc3545;
+}
