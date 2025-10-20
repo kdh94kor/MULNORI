@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMen
                         data-menu="realtime"
                     >
                         <span className={styles.menuIcon}>🌊</span>
-                        <span className={styles.menuText}>실시간 바다 상황</span>
+                        <span className={styles.menuText}>다이빙 지도</span>
                     </li>
                 </Link>
                 <Link to="/board" className={styles.menuLink}>
@@ -39,14 +39,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMen
                         <span className={styles.menuText}>버디구해요</span>
                     </li>
                 </Link>
-                <li
-                    className={`${styles.menuItem} ${activeMenuItem === 'settings' ? styles.active : ''}`}
-                    onClick={() => onMenuItemClick('settings')}
-                    data-menu="settings"
-                >
-                    <span className={styles.menuIcon}>⚙️</span>
-                    <span className={styles.menuText}>설정</span>
-                </li>
+                <Link to="/settings" className={styles.menuLink}>
+                    <li
+                        className={`${styles.menuItem} ${activeMenuItem === 'settings' ? styles.active : ''}`}
+                        onClick={() => onMenuItemClick('settings')}
+                        data-menu="settings"
+                    >
+                        <span className={styles.menuIcon}>⚙️</span>
+                        <span className={styles.menuText}>설정</span>
+                    </li>
+                </Link>
             </ul>
         </div>
     );
