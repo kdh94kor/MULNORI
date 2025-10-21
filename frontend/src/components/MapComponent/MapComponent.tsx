@@ -95,32 +95,27 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
   
     const handleTagDelete = async (pointId: number, tagToDelete: string) => {
         try {
-            const response = await fetch(`/api/Delete_DivePointMstTag_V1/${pointId}`, {
-                method: 'DELETE',
+            const response = await fetch(`/api/tags/request-deletion`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ tagToDelete }),
+                body: JSON.stringify({ divePointId: pointId, tagName: tagToDelete }),
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '태그 삭제 실패');
+                throw new Error(result.message || '태그 삭제 요청에 실패했습니다.');
             }
 
-            // If backend deletion is successful, update frontend state
-            setDivePointMsts(prevMsts =>
-                prevMsts.map(point =>
-                    point.id === pointId
-                        ? { ...point, tags: point.tags.split(',').filter(tag => tag.trim() !== tagToDelete).join(',') }
-                        : point
-                )
-            );
-            alert('태그가 성공적으로 삭제되었습니다.');
+           
+
+            alert(result.message);
 
         } catch (error: any) {
-            console.error('태그 삭제 중 오류 발생:', error);
-            alert(`태그 삭제 실패: ${error.message}`);
+            console.error('태그 삭제 요청 중 오류 발생:', error);
+            alert(`태그 삭제 요청 실패: ${error.message}`);
         }
     };
 
