@@ -19,4 +19,7 @@ export class TagDeletionRequest {
 
     @Column({ type: "int", default: 1 })
     requestCount!: number;
+
+    @Column({ type: "boolean", default: false })
+    is_hidden!: boolean;
 }
