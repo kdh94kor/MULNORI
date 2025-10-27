@@ -26,7 +26,6 @@ export const AppDataSource = new DataSource({
   migrations: [],
   subscribers: [],
   ssl: { 
-    // rejectUnauthorized: false
      ca: fs.readFileSync(pemPath).toString(), 
   }
 });

@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import express, { Application } from 'express';
-import dotenv from 'dotenv';
 import { setupSwagger } from './swagger';
 
 import categoryRouter from './src/routes/category.router';
@@ -8,11 +7,9 @@ import divepointRouter from './src/routes/divepoint.router';
 import divepointMstRouter from './src/routes/divepointmst.router';
 import tagRouter from './src/routes/tag.router';
 import boardRouter from './src/routes/board.router';
-import uploadRouter from './src/routes/upload.router';
+// import uploadRouter from './src/routes/upload.router';
 
 export const app: Application = express();
-
-dotenv.config();
 
 app.use(express.json());
 
@@ -23,4 +20,4 @@ app.use('/api', divepointRouter);
 app.use('/api', divepointMstRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api', boardRouter);
-app.use('/api/upload', uploadRouter); // 업로드 라우터 적용
+// app.use('/api/upload', uploadRouter); // 업로드 라우터 적용

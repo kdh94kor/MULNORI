@@ -6,11 +6,11 @@ interface InfoWindowContentProps {
         lat: number;
         lot: number;
         pointName: string;
-        tags: string; // Comma-separated string
-        recommendationCount?: number;
+        tags?: string | null;
+        pointStatus: "PENDING" | "APPROVED" | "REJECTED";
     };
     onTagDelete: (pointId: number, tagToDelete: string) => void;
-    onTagAdd: (pointId: number, newTag: string) => void; // New prop
+    onTagAdd: (pointId: number, newTag: string) => void;
 }
 
 const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelete, onTagAdd }) => {
@@ -20,17 +20,18 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
 
     const handleTagDelete = (tag: string) => {
         if (window.confirm(`'${tag}' 태그를 삭제하시겠습니까?`)) {
-            onTagDelete(point.id, tag);
+            if (point.id) {
+                onTagDelete(point.id, tag);
+            }
         }
     };
 
     const tagsArray = point.tags ? point.tags.split(',').map(tag => tag.trim()) : [];
 
     const handleTagAdd = () => {
-        if (newTag.trim() && !tagsArray.includes(newTag.trim())) {
+        if (newTag.trim() && !tagsArray.includes(newTag.trim()) && point.id) {
             onTagAdd(point.id, newTag.trim());
             setNewTag('');
-            // setIsAddingTag(false); // Close input after adding
         } else if (tagsArray.includes(newTag.trim())) {
             alert('이미 존재하는 태그입니다.');
         }
@@ -58,6 +59,8 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
                                     color: '#333',
                                     padding: '3px 8px',
                                     borderRadius: '12px',
+                                    marginRight: '5px',
+                                    marginBottom: '5px',
                                     fontSize: '12px',
                                 }}
                             >
@@ -125,7 +128,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
                         />
                     )}
                 </div>
-
+                
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                     <span style={{ color: '#dc3545', fontSize: '1.2em', marginRight: '5px' }}>❤️</span>
                     <span style={{ fontSize: '13px', color: '#6c757d' }}>{point.recommendationCount || 0}</span>
