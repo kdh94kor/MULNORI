@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { RequestStatus } from "../constants/request-status.enum";
 
 @Entity("M_DivePointMst")
 export class DivePointMst {
@@ -17,5 +18,12 @@ export class DivePointMst {
 
     @Column({nullable: true})
     tags!: string;
+
+    @Column({
+        type: "enum",
+        enum: RequestStatus,
+        default: RequestStatus.PENDING
+    })
+    pointStatus!: RequestStatus;
 
 }

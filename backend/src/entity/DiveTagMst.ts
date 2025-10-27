@@ -12,6 +12,9 @@ export class DiveTagMst {
   @Column() 
   tagtype!: string; // 태그타입
 
+  @Column({nullable: true})
+  tagStatus!: string;
+
   // @OneToMany(() => DivePointMst, (divePoint) => divePoint.tags)
   // divePoints!: DivePointMst[];
 

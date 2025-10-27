@@ -4,7 +4,7 @@ import InfoPanel from '../InfoPanel/InfoPanel';
 import { fetchDivePointMst } from '../../utils/api';
 import InfoWindowContent from './InfoWindowContent';
 import ReactDOM from 'react-dom/client';
-
+import type { components } from '../../types/api';
 
 //DivePoint entity와는 구조를 다르게 가자
 interface DivePoint {
@@ -22,14 +22,7 @@ interface DivePoint {
     lastScr: number;
 }
 
-interface DivePointMst {
-    id: number;
-    lat: number;
-    lot: number;
-    pointName: string;
-    tags: string;
-    recommendationCount: number
-}
+type DivePointMst = components['schemas']['DivePointMst'];
 
 declare global {
     interface Window {
@@ -108,11 +101,10 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 throw new Error(errorData.message || '태그 삭제 실패');
             }
 
-            // If backend deletion is successful, update frontend state
             setDivePointMsts(prevMsts =>
                 prevMsts.map(point =>
                     point.id === pointId
-                        ? { ...point, tags: point.tags.split(',').filter(tag => tag.trim() !== tagToDelete).join(',') }
+                        ? { ...point, tags: (point.tags || '').split(',').filter(tag => tag.trim() !== tagToDelete).join(',') }
                         : point
                 )
             );
@@ -339,7 +331,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 try {
                     const error = await response.json();
                     errorMessage = error.message || '포인트 등록 실패ㅠ';
-                } catch (e) {
+                }
+                catch (e) {
                     // 응답이 JSON이 아닐 경우를 대비
                 }
                 throw new Error(errorMessage);
@@ -380,7 +373,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                             
                             // 사용자 등록 포인트 API
                             const loadMstData = async () => {
-                                const result = await fetchDivePointMst();
+                                // 승인된 항목만 보여주자 
+                                const result = await fetchDivePointMst('APPROVED');
                                 if (result.success) {
                                     setDivePointMsts(result.data);
                                 } else {
@@ -424,7 +418,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
         if (map) {
             loadDivePointData(1);
             const loadMstData = async () => {
-                const result = await fetchDivePointMst();
+                const result = await fetchDivePointMst('APPROVED');
                 if (result.success) {
                     setDivePointMsts(result.data);
                 } else {
@@ -487,7 +481,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
             console.log(`${newPointData.lat},${newPointData.lot},${newPointData.pointName},${newPointData.tags}`);
             await addDivePointData(newPointData);
 
-            alert('??포인트 등록이 요청이 정상적으로 완료되었습니다!??\n\n??담당자 검토 후 반영됩니다!??');
+            alert('🎉포인트 등록 요청이 정상적으로 완료되었습니다!🎉\n\n🕵️‍♀️담당자 검토 후 반영됩니다!✨');
             setIsFormOpen(false);
 
         }catch(error: any){
