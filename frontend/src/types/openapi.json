@@ -1,0 +1,524 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MULNORI API",
+    "version": "1.0.0",
+    "description": "MULNORI API SWAGGER"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "개발 서버"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "DivePointMst": {
+        "type": "object",
+        "required": [
+          "id",
+          "lat",
+          "lot",
+          "pointName",
+          "pointStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Dive Point Master ID"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude"
+          },
+          "lot": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude"
+          },
+          "pointName": {
+            "type": "string",
+            "description": "Point Name"
+          },
+          "tags": {
+            "type": "string",
+            "description": "Tags associated with the point"
+          },
+          "pointStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "description": "Status of the point"
+          }
+        }
+      },
+      "DivePoint": {
+        "type": "object",
+        "required": [
+          "id",
+          "skscExpcnRgnNm",
+          "lat",
+          "lot"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "자동 생성된 고유 ID"
+          },
+          "skscExpcnRgnNm": {
+            "type": "string",
+            "description": "다이빙 포인트 지역명"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double",
+            "description": "위도"
+          },
+          "lot": {
+            "type": "number",
+            "format": "double",
+            "description": "경도"
+          },
+          "predcYmd": {
+            "type": "string",
+            "description": "예측일자 (YYYYMMDD)"
+          },
+          "predcNoonSeCd": {
+            "type": "string",
+            "description": "예측 시간 구분 (오전/오후)"
+          },
+          "tdlvHrCn": {
+            "type": "string",
+            "description": "조석 시간 정보"
+          },
+          "minWvhgt": {
+            "type": "string",
+            "description": "최소 파고(m)"
+          },
+          "maxWvhgt": {
+            "type": "string",
+            "description": "최대 파고(m)"
+          },
+          "totalIndex": {
+            "type": "string",
+            "description": "스쿠버 종합지수 (매우좋음, 좋음, 보통, 나쁨)"
+          },
+          "lastScr": {
+            "type": "number",
+            "format": "double",
+            "description": "최종 점수"
+          }
+        },
+        "example": {
+          "id": 1,
+          "skscExpcnRgnNm": "제주 서귀포",
+          "lat": 33.2461,
+          "lot": 126.5615,
+          "predcYmd": "20250917",
+          "predcNoonSeCd": "오전",
+          "tdlvHrCn": "1",
+          "minWvhgt": "0.5",
+          "maxWvhgt": "1.0",
+          "totalIndex": "좋음",
+          "lastScr": 85
+        }
+      }
+    }
+  },
+  "paths": {
+    "/categories": {
+      "get": {
+        "summary": "모든 게시판 카테고리(계층구조) 조회",
+        "tags": [
+          "Category"
+        ],
+        "description": "BoardCategoryMaster에 저장된 모든 카테고리를 계층 구조(트리) 형태로 조회합니다.",
+        "responses": {
+          "200": {
+            "description": "성공. 카테고리 트리 배열을 반환합니다."
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/categories/children/{parentName}": {
+      "get": {
+        "summary": "특정 상위 카테고리에 속한 하위 카테고리 목록 조회",
+        "tags": [
+          "Category"
+        ],
+        "description": "주어진 부모 카테고리 이름에 해당하는 모든 하위 카테고리를 조회합니다.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "parentName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "하위 카테고리를 조회할 부모 카테고리의 이름"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공. 하위 카테고리 객체 배열을 반환합니다."
+          },
+          "404": {
+            "description": "상위 카테고리를 찾을 수 없음."
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/Get_DivePoint_V1": {
+      "get": {
+        "summary": "다이빙 포인트 정보 조회",
+        "description": "공공데이터 포털의 스킨스쿠버 지수 API를 이용해 다이빙 포인트 정보를 가져옵니다.",
+        "tags": [
+          "DivePoint"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageNo",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "description": "페이지 번호"
+          },
+          {
+            "in": "query",
+            "name": "numOfRows",
+            "schema": {
+              "type": "string",
+              "default": "10"
+            },
+            "description": "한 페이지 결과 수"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공. 다이빙 포인트 정보 배열을 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DivePoint"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "서버 오류 또는 API 키가 없는 경우.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "500 error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Set_DivePointMst_V1": {
+      "post": {
+        "summary": "새로운 다이빙 포인트 등록 요청",
+        "description": "등록 요청된 다이빙 포인트를 등록합니다.",
+        "tags": [
+          "DivePointMst"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pointName": {
+                    "type": "string",
+                    "format": "string",
+                    "description": "포인트명",
+                    "example": "하조대전망대"
+                  },
+                  "lat": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "위도",
+                    "example": 37.5665
+                  },
+                  "lot": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "경도",
+                    "example": 126.978
+                  },
+                  "tags": {
+                    "type": "string",
+                    "format": "string",
+                    "description": "포인트 태그",
+                    "example": {
+                      "샤워장있음": null,
+                      "수심5m": null
+                    }
+                  },
+                  "pointStatus": {
+                    "type": "string",
+                    "description": "포인트 항목 상태",
+                    "enum": [
+                      "PENDING",
+                      "APPROVED",
+                      "REJECTED"
+                    ],
+                    "example": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "다이빙 포인트가 정상적으로 등록되었습니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "DivePoint saved successfully"
+                    },
+                    "divePoint": {
+                      "$ref": "#/components/schemas/DivePointMst"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "필수 필드가 누락되었거나 데이터 형식이 올바르지 않습니다."
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/Get_DivePointMst_V1": {
+      "get": {
+        "summary": "저장된 다이빙 포인트 마스터 정보 조회",
+        "description": "데이터베이스에 저장된 모든 다이빙 포인트 마스터 정보를 조회합니다.",
+        "tags": [
+          "DivePointMst"
+        ],
+        "responses": {
+          "200": {
+            "description": "성공. 다이빙 포인트 마스터 정보 배열을 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DivePointMst"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/Get_DivePointMst_V2": {
+      "get": {
+        "summary": "저장된 다이빙 포인트 조회 V2",
+        "description": "데이터베이스에 저장된 모든 다이빙 포인트 마스터 정보를 조회합니다. 승인여부 필터 적용됨",
+        "tags": [
+          "DivePointMst"
+        ],
+        "responses": {
+          "200": {
+            "description": "성공. 다이빙 포인트 마스터 정보 배열을 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DivePointMst"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "유효하지 않은 승인여부"
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/Update_DivePointMstStatus_V1/{id}": {
+      "patch": {
+        "summary": "다이빙 포인트 상태 업데이트",
+        "description": "특정 다이빙 포인트의 승인 상태를 업데이트합니다.",
+        "tags": [
+          "DivePointMst"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "다이빙 포인트의 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "업데이트할 포인트 상태",
+                    "enum": [
+                      "PENDING",
+                      "APPROVED",
+                      "REJECTED"
+                    ],
+                    "example": "APPROVED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "다이빙 포인트 상태가 성공적으로 업데이트되었습니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "DivePoint status updated successfully"
+                    },
+                    "divePoint": {
+                      "$ref": "#/components/schemas/DivePointMst"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "유효하지 않은 요청 (예: ID 누락, 유효하지 않은 상태 값)."
+          },
+          "404": {
+            "description": "해당 ID의 다이빙 포인트를 찾을 수 없습니다."
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    },
+    "/Delete_DivePointMstTag_V1/{id}": {
+      "delete": {
+        "summary": "다이빙 포인트 태그 삭제",
+        "description": "특정 다이빙 포인트에서 지정된 태그를 삭제합니다.",
+        "tags": [
+          "DivePointMst"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "다이빙 포인트의 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tagToDelete": {
+                    "type": "string",
+                    "description": "삭제할 태그 이름",
+                    "example": "바다"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "태그가 성공적으로 삭제되었습니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tag deleted successfully"
+                    },
+                    "divePoint": {
+                      "$ref": "#/components/schemas/DivePointMst"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 본문에 tagToDelete가 누락되었거나 유효하지 않습니다."
+          },
+          "404": {
+            "description": "해당 ID의 다이빙 포인트를 찾을 수 없거나 삭제할 태그를 찾을 수 없습니다."
+          },
+          "500": {
+            "description": "서버 오류."
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

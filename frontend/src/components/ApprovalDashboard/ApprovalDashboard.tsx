@@ -1,43 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ApprovalDashboard.module.css';
+import { fetchDivePointMst } from '../../utils/api';
+import type { components } from '../../types/api';
 
-// 테스트용 데이터 
-const dummyRequests = [
-  {
-    id: 1,
-    type: '포인트 추가 요청',
-    content: '새로운 다이빙 포인트: 제주도 서귀포시',
-    status: 'pending'
-  },
-  {
-    id: 2,
-    type: '태그 삭제 요청',
-    content: '포인트 #123 - 태그 \'샤워장잇음\' 삭제 요청',
-    status: 'pending'
-  },
-  {
-    id: 3,
-    type: '태그 추가 요청',
-    content: '포인트 #45 - 태그 \'거북이\' 추가 요청',
-    status: 'approved'
-  },
-];
+type DivePointMst = components['schemas']['DivePointMst'];
 
 const ApprovalDashboard: React.FC = () => {
-  const [requests, setRequests] = useState(dummyRequests);
+  const [requests, setRequests] = useState<DivePointMst[]>([]);
 
-  // TODO: API를 통해 실제 데이터를 가져오는 로직 추가
-  // useEffect(() => {
-  //   fetch('/api/admin/requests')
-  //     .then(res => res.json())
-  //     .then(data => setRequests(data));
-  // }, []);
+  useEffect(() => {
+    const loadPendingRequests = async () => {
+      // 승인대기만 불러오기 
+      const result = await fetchDivePointMst('PENDING');
+      if (result.success) {
+        setRequests(result.data as DivePointMst[]);
+      } else {
+        console.error(result.message);
+      }
+    };
+    loadPendingRequests();
+  }, []);
 
-  const handleAction = (id: number, action: 'approve' | 'reject' | 'pend') => {
-    console.log(`Request ${id} action: ${action}`);
-    setRequests(requests.map(req => 
-      req.id === id ? { ...req, status: action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'pending' } : req
-    ));
+  const handleAction = async (id: number, action: 'approve' | 'reject' | 'pend') => {
+    let newStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+    let korStatus = '';
+    switch (action) {
+      case 'approve':
+        newStatus = 'APPROVED';
+        korStatus = '승인';
+        break;
+      case 'reject':
+        newStatus = 'REJECTED';
+        korStatus = '거절';
+        break;
+      case 'pend':
+        newStatus = 'PENDING';
+        korStatus = '보류';
+        break;
+      default:
+        console.error('Invalid action:', action);
+        return;
+    }
+
+    try {
+      const response = await fetch(`/api/Update_DivePointMstStatus_V1/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update status');
+      }
+
+      setRequests(prevRequests => prevRequests.filter(req => req.id !== id));
+      alert(`${id}포인트를 ${korStatus}(으)로 변경하였습니다.`);
+
+    } catch (error: any) {
+      console.error('Error updating dive point status:', error);
+      alert(`상태 변경 실패: ${error.message}`);
+    }
   };
 
   return (
@@ -47,8 +72,10 @@ const ApprovalDashboard: React.FC = () => {
         <thead>
           <tr>
             <th>요청 ID</th>
-            <th>요청 항목</th>
-            <th>요청 내용</th>
+            <th>포인트 이름</th>
+            <th>위도</th>
+            <th>경도</th>
+            <th>태그</th>
             <th>상태</th>
             <th>작업</th>
           </tr>
@@ -57,15 +84,17 @@ const ApprovalDashboard: React.FC = () => {
           {requests.map((req) => (
             <tr key={req.id}>
               <td>{req.id}</td>
-              <td>{req.type}</td>
-              <td>{req.content}</td>
+              <td>{req.pointName}</td>
+              <td>{req.lat}</td>
+              <td>{req.lot}</td>
+              <td>{req.tags}</td>
               <td>
-                <span className={`${styles.status} ${styles[req.status]}`}>
-                  {req.status}
+                <span className={`${styles.status} ${styles[req.pointStatus?.toLowerCase() || '']}`}>
+                  {req.pointStatus}
                 </span>
               </td>
               <td>
-                {req.status === 'pending' && (
+                {req.pointStatus === 'PENDING' && (
                   <div className={styles.actions}>
                     <button onClick={() => handleAction(req.id, 'approve')} className={`${styles.actionBtn} ${styles.approve}`}>승인</button>
                     <button onClick={() => handleAction(req.id, 'pend')} className={`${styles.actionBtn} ${styles.pend}`}>보류</button>

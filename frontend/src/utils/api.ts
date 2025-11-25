@@ -73,9 +73,13 @@ export const fetchBoardList = async () => {
 };
 
 // DivePointMst 데이터 불러오기
-export const fetchDivePointMst = async () => {
+export const fetchDivePointMst = async (status?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     try {
-        const response = await fetch('/api/Get_DivePointMst_V1');
+        let url = '/api/Get_DivePointMst_V2';
+        if (status) {
+            url += `?status=${status}`;
+        }
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

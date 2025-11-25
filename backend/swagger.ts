@@ -17,11 +17,48 @@ const options: swaggerJsdoc.Options = {
         description: '개발 서버',
       },
     ],
+    components: {
+      schemas: {
+        DivePointMst: {
+          type: 'object',
+          required: ['id', 'lat', 'lot', 'pointName', 'pointStatus'],
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'Dive Point Master ID'
+            },
+            lat: {
+              type: 'number',
+              format: 'double',
+              description: 'Latitude'
+            },
+            lot: {
+              type: 'number',
+              format: 'double',
+              description: 'Longitude'
+            },
+            pointName: {
+              type: 'string',
+              description: 'Point Name'
+            },
+            tags: {
+              type: 'string',
+              description: 'Tags associated with the point'
+            },
+            pointStatus: {
+              type: 'string',
+              enum: ['PENDING', 'APPROVED', 'REJECTED'],
+              description: 'Status of the point'
+            }
+          }
+        }
+      }
+    }
   },
-  apis: [path.join(__dirname, './server.ts'), path.join(__dirname, './src/entity/*.ts')],
+  apis: [path.join(__dirname, './src/routes/*.ts'), path.join(__dirname, './src/entity/*.ts')],
 };
 
-const specs = swaggerJsdoc(options);
+export const specs = swaggerJsdoc(options);
 
 export const setupSwagger = (app: Application) => {
   app.use(
