@@ -241,22 +241,18 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                     });
 
                     const iwContent = document.createElement('div');
-                    iwContent.style.padding = '0'; // Remove default padding if any
+                    iwContent.style.padding = '0';
 
-                    // Render the React component into the div
-                    // Using ReactDOM.render for older React versions, or createRoot().render for React 18+
-                    // Assuming React 17 or earlier for now, if React 18, it would be createRoot(iwContent).render(...)
                     const root = ReactDOM.createRoot(iwContent);
                     root.render(
                         <InfoWindowContent point={point} onTagDelete={handleTagDelete} onTagAdd={handleTagAdd} />
                     );
 
                     const infowindow = new window.kakao.maps.InfoWindow({
-                        content: iwContent, // Pass the DOM element directly
+                        content: iwContent, 
                         removable: true
                     });
 
-                    // Add event listener to unmount the React component when infowindow closes
                     window.kakao.maps.event.addListener(infowindow, 'close', function() {
                         root.unmount();
                     });

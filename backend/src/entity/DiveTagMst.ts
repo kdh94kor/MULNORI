@@ -1,22 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from "typeorm";
 import { DivePointMst } from "./DivePointMst";
+import { RequestStatus } from "../constants/request-status.enum";
 
 @Entity("M_DivTagMst")
 export class DiveTagMst {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column() 
+  @Column({ unique: true }) 
   name!: string; // 태그명
 
   @Column() 
   tagtype!: string; // 태그타입
 
-  @Column({nullable: true})
-  tagStatus!: string;
+  @Column({
+    type: "enum",
+    enum: RequestStatus,
+    default: RequestStatus.PENDING
+  })
+  tagStatus!: RequestStatus;
 
-  // @OneToMany(() => DivePointMst, (divePoint) => divePoint.tags)
-  // divePoints!: DivePointMst[];
-
+  @ManyToMany(() => DivePointMst, (divePointMst) => divePointMst.tags)
+  divePointMsts!: DivePointMst[];
 
 }

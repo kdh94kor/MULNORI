@@ -1,0 +1,120 @@
+.container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.treeContainer {
+  margin-top: 20px;
+}
+
+.categoryItem {
+  margin: 5px 0;
+}
+
+.categoryContent {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.categoryContent:hover {
+  background-color: #e9ecef;
+}
+
+.categoryName {
+  flex-grow: 1;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.addBtn {
+  background-color: #28a745;
+  color: white;
+}
+
+.editBtn {
+  background-color: #ffc107;
+  color: black;
+}
+
+.deleteBtn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.childrenContainer {
+  margin-left: 24px;
+  border-left: 1px solid #dee2e6;
+  padding-left: 12px;
+}
+
+.formContainer {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.input {
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin-right: 10px;
+  width: 200px;
+}
+
+.submitBtn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}

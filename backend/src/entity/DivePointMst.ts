@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
 import { RequestStatus } from "../constants/request-status.enum";
+import { DiveTagMst } from "./DiveTagMst";
 
 @Entity("M_DivePointMst")
 export class DivePointMst {
@@ -16,8 +17,9 @@ export class DivePointMst {
     @Column({nullable: false})
     pointName!: string;
 
-    @Column({nullable: true})
-    tags!: string;
+    @ManyToMany(() => DiveTagMst, (diveTagMst) => diveTagMst.divePointMsts)
+    @JoinTable()
+    tags!: DiveTagMst[];
 
     @Column({
         type: "enum",

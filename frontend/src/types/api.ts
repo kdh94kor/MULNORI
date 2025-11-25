@@ -352,6 +352,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/Update_DivePointMstStatus_V1/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 다이빙 포인트 상태 업데이트
+         * @description 특정 다이빙 포인트의 승인 상태를 업데이트합니다.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 다이빙 포인트의 ID */
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description 업데이트할 포인트 상태
+                         * @example APPROVED
+                         * @enum {string}
+                         */
+                        status?: "PENDING" | "APPROVED" | "REJECTED";
+                    };
+                };
+            };
+            responses: {
+                /** @description 다이빙 포인트 상태가 성공적으로 업데이트되었습니다. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example DivePoint status updated successfully */
+                            message?: string;
+                            divePoint?: components["schemas"]["DivePointMst"];
+                        };
+                    };
+                };
+                /** @description 유효하지 않은 요청 (예: ID 누락, 유효하지 않은 상태 값). */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description 해당 ID의 다이빙 포인트를 찾을 수 없습니다. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description 서버 오류. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
     "/Delete_DivePointMstTag_V1/{id}": {
         parameters: {
             query?: never;
@@ -503,6 +581,24 @@ export interface components {
              * @description 최종 점수
              */
             lastScr?: number;
+        };
+        TagApproval: {
+            /** @description Tag Approval ID */
+            id: number;
+            /** @description ID of the Dive Point */
+            divePointId: number;
+            /** @description Name of the tag */
+            tagName: string;
+            /**
+             * @description Status of the tag approval request
+             * @enum {string}
+             */
+            tagStatus: "PENDING" | "APPROVED" | "REJECTED";
+            /**
+             * Format: date-time
+             * @description Date and time when the request was made
+             */
+            requestedAt?: string;
         };
     };
     responses: never;
