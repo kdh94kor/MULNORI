@@ -21,7 +21,7 @@ const BuddyBoard: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const categoriesResult = await fetchCategoriesByParent('버디');
+      const categoriesResult = await fetchCategoriesByParent('버디구해요');
       if (categoriesResult.success) {
         setCategories(categoriesResult.data);
       }
@@ -35,13 +35,12 @@ const BuddyBoard: React.FC = () => {
   }, []);
 
   const handlePostSubmit = async (newPostData: { categoryId: number; title: string; content: string; }) => {
-    const postWithAuthor = { ...newPostData, author: '현재사용자' }; // Add author before sending
+    const postWithAuthor = { ...newPostData, author: '현재사용자' }; 
     const result = await createPost(postWithAuthor);
 
     if (result.success) {
         const boardListResult = await fetchBoardList();
         if (boardListResult.success) {
-            // No need to mock author anymore if backend provides it
             setPosts(boardListResult.data);
         }
         setViewMode('list');

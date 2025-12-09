@@ -1,8 +1,36 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { DivePointMst } from "./DivePointMst";
 
-export type ApprovalStatus = "pending" | "approved" | "rejected";
-
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TagApproval:
+ *       type: object
+ *       required:
+ *         - id
+ *         - divePointId
+ *         - tagName
+ *         - tagStatus
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: Tag Approval ID
+ *         divePointId:
+ *           type: integer
+ *           description: ID of the Dive Point
+ *         tagName:
+ *           type: string
+ *           description: Name of the tag
+ *         tagStatus:
+ *           type: string
+ *           enum: [PENDING, APPROVED, REJECTED]
+ *           description: Status of the tag approval request
+ *         requestedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Date and time when the request was made
+ */
 @Entity("M_TagApproval")
 export class TagApproval {
     
@@ -20,11 +48,10 @@ export class TagApproval {
     tagName!: string;
 
     @Column({
-        type: "enum",
-        enum: ["pending", "approved", "rejected"],
-        default: "pending"
+      nullable: true,
+      default: null,
     })
-    status!: ApprovalStatus;
+    tagStatus!: string;
 
     @CreateDateColumn()
     requestedAt!: Date;

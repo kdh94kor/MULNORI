@@ -6,7 +6,7 @@ interface InfoWindowContentProps {
         lat: number;
         lot: number;
         pointName: string;
-        tags?: string | null;
+        tags?: { id: number; name: string; tagtype: string; tagStatus: string; }[]; // Updated type
         pointStatus: "PENDING" | "APPROVED" | "REJECTED";
     };
     onTagDelete: (pointId: number, tagToDelete: string) => void;
@@ -26,7 +26,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
         }
     };
 
-    const tagsArray = point.tags ? point.tags.split(',').map(tag => tag.trim()) : [];
+    const tagsArray = point.tags ? point.tags.map(tag => tag.name) : []; // Updated logic
 
     const handleTagAdd = () => {
         if (newTag.trim() && !tagsArray.includes(newTag.trim()) && point.id) {
@@ -131,7 +131,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
                 
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                     <span style={{ color: '#dc3545', fontSize: '1.2em', marginRight: '5px' }}>❤️</span>
-                    <span style={{ fontSize: '13px', color: '#6c757d' }}>{point.recommendationCount || 0}</span>
+                    {/* <span style={{ fontSize: '13px', color: '#6c757d' }}>{point.recommendationCount || 0}</span> */}
                     <em style={{ color: '#6c757d', marginLeft: '10px' }}>(000님 추천 포인트)</em>
                 </div>
             </div>

@@ -2,9 +2,9 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { DivePoint } from "./entity/DivePoint";
 import { DivePointMst } from "./entity/DivePointMst";
-import { TagApproval } from "./entity/TagApproval";
 import { TagDeletionRequest } from "./entity/TagDeletionRequest";
 import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
+import { DiveTagMst } from "./entity/DiveTagMst";
 import { Board } from "./entity/Board";
 import * as fs from 'fs';
 
@@ -22,7 +22,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true, 
   logging: false,
-  entities: [DivePoint, DivePointMst, TagApproval, TagDeletionRequest, Board, BoardCategoryMaster],
+  entities: [DivePoint, DivePointMst, TagDeletionRequest, Board, BoardCategoryMaster, DiveTagMst],
   migrations: [],
   subscribers: [],
   ssl: { 

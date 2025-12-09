@@ -2,9 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout/MainLayout';
 import BuddyBoard from './components/BuddyBoard/BuddyBoard';
-import PostDetail from './components/PostDetail/PostDetail'; // PostDetail 임포트
-import ImageUploader from './components/ImageUploader/ImageUploader'; // ImageUploader 임포트
-import ApprovalDashboard from './components/ApprovalDashboard/ApprovalDashboard';
+import PostDetail from './components/PostDetail/PostDetail';
+import ImageUploader from './components/ImageUploader/ImageUploader';
+import SettingsPage from './components/Settings/SettingsPage';
 
 function App() {
 
@@ -17,8 +17,8 @@ function App() {
     <Routes>
       <Route path="/" element={<MainLayout />} />
       <Route path="/board" element={<MainLayout><BuddyBoard /></MainLayout>} />
-      <Route path="/board/:id" element={<MainLayout><PostDetail /></MainLayout>} /> {/* 상세 페이지 라우트 추가 */}
-      {/* 이미지 업로더 테스트 */}
+      <Route path="/board/:id" element={<MainLayout><PostDetail /></MainLayout>} />
+      
       <Route 
         path="/upload-test" 
         element={
@@ -31,7 +31,7 @@ function App() {
         } 
       />
 
-      <Route path="/settings" element={<MainLayout><ApprovalDashboard /></MainLayout>} />
+      <Route path="/settings" element={<MainLayout><SettingsPage /></MainLayout>} />
     </Routes>
   );
 }

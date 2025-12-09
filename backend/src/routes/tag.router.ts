@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
-import { TagApproval } from '../entity/TagApproval';
 import { DivePointMst } from '../entity/DivePointMst';
 import { TagDeletionRequest } from '../entity/TagDeletionRequest';
+import { DiveTagMst } from '../entity/DiveTagMst';
+import { RequestStatus } from '../constants/request-status.enum';
 
 const router = Router();
+
 
 //태그 삭제요청 카운트
 const DELETION_REQUEST_THRESHOLD = 5; 
@@ -17,20 +19,17 @@ router.post('/request', async (req: Request, res: Response) => {
             return res.status(400).json({ message: '다이빙포인트 ID와 태그 이름은 필수 항목입니다.' });
         }
 
-        // Optional: Check if the DivePointMst actually exists
         const divePointRepo = AppDataSource.getRepository(DivePointMst);
         const divePoint = await divePointRepo.findOneBy({ id: divePointId });
         if (!divePoint) {
             return res.status(404).json({ message: '해당 다이빙포인트를 찾을 수 없습니다.' });
         }
 
-        // Optional: Check if the tag already exists on the point
         const existingTags = divePoint.tags ? divePoint.tags.split(',').map(t => t.trim()) : [];
         if (existingTags.includes(tagName)) {
             return res.status(409).json({ message: '이미 존재하는 태그입니다.' });
         }
 
-        // Optional: Check if there is already a pending request for this tag
         const tagApprovalRepo = AppDataSource.getRepository(TagApproval);
         const existingRequest = await tagApprovalRepo.findOne({
             where: {
@@ -47,7 +46,6 @@ router.post('/request', async (req: Request, res: Response) => {
         const newTagRequest = new TagApproval();
         newTagRequest.divePointId = divePointId;
         newTagRequest.tagName = tagName;
-        // status defaults to 'pending'
 
         await tagApprovalRepo.save(newTagRequest);
 
@@ -59,6 +57,7 @@ router.post('/request', async (req: Request, res: Response) => {
     }
 });
 
+
 router.post('/request-deletion', async (req: Request, res: Response) => {
     try {
         const { divePointId, tagName } = req.body;
@@ -67,9 +66,11 @@ router.post('/request-deletion', async (req: Request, res: Response) => {
             return res.status(400).json({ message: '다이빙포인트 ID와 태그 이름은 필수 항목입니다.' });
         }
 
-        // Check if the DivePointMst actually exists
         const divePointRepo = AppDataSource.getRepository(DivePointMst);
-        const divePoint = await divePointRepo.findOneBy({ id: divePointId });
+        const divePoint = await divePointRepo.findOne({
+            where: { id: divePointId },
+            relations: ["tags"], 
+        });
         if (!divePoint) {
             return res.status(404).json({ message: '해당 다이빙포인트를 찾을 수 없습니다.' });
         }
@@ -118,6 +119,68 @@ router.post('/request-deletion', async (req: Request, res: Response) => {
         res.status(500).json({ message: '태그 삭제 요청에 실패했습니다.', error: error.message });
     }
 });
+
+router.get('/Get_TagMst_V2', async (req: Request, res: Response) => { // 승인, 미승인 필터 추가
+    try {
+        const { tagStatus } = req.query;
+
+        const diveTagMstRepo = AppDataSource.getRepository(DiveTagMst);
+        const whereClause: any = {}; 
+        if (tagStatus) {
+
+            const isValidStatus = Object.values(RequestStatus).includes(tagStatus as RequestStatus);
+
+            if (isValidStatus) {
+
+                whereClause.tagStatus = tagStatus as RequestStatus;
+            } else { // status값이 enum에 해당하지 않는 경우
+                return res.status(400).json({ message: '유효하지 않은 status 값입니다.' });
+            }
+        }
+        
+        const diveTags = await diveTagMstRepo.find({
+            where: whereClause
+        });
+        
+        res.json(diveTags);
+        
+    } catch (error: any) {
+        console.error('조회 오류:', error);
+        res.status(500).json({ message: '태그 조회 중 오류 발생', error: error.message });
+    }
+});
+
+router.patch('/Update_tagsMstStatus_V1/:id', async (req: Request, res: Response) => {
+    try {
+
+        /* 1. 태그 상태 변경하기 */
+        const tagId = parseInt(req.params.id, 10);
+        const {tagStatus} = req.body
+
+        if (isNaN(tagId)){
+            return res.status(400).json({message: '유효하지 않은 태그 정보입니다."'});
+        }
+
+        const diveTagMstRepo = AppDataSource.getRepository(DiveTagMst);
+        const diveTag = await diveTagMstRepo.findOneBy({id: tagId});
+
+        if (!diveTag){
+            return res.status(400).json({message: '해당 태그를 찾을 수 없습니다.'});
+        }
+
+        diveTag.tagStatus = tagStatus;
+        await diveTagMstRepo.save(diveTag);
+
+        res.status(200).json({message: '성공적으로 변경 되었습니다.', DiveTagMst:diveTag});
+
+        
+    } catch(error: any) {
+        console.error('태그 상태 변경 중 오류', error);
+        res.status(500).json({message: '태그 상태 변경 중 api 오류발생', error: error.message});
+    }
+
+});
+
 
 router.get('/admin/hidden-tags', async (req: Request, res: Response) => {
     try {

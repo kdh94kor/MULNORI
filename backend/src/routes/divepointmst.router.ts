@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { DivePointMst } from '../entity/DivePointMst';
 import { RequestStatus } from '../constants/request-status.enum';
+import { DiveTagMst } from '../entity/DiveTagMst';
 import swaggerJSDoc from 'swagger-jsdoc';
 
 const router = Router();
@@ -36,10 +37,11 @@ const router = Router();
  *                 description: 경도
  *                 example: 126.9780
  *               tags:
- *                 type: string
- *                 format: string
- *                 description: 포인트 태그
- *                 example: {"샤워장있음","수심5m"}
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 포인트 태그 목록
+ *                 example: ["샤워장있음","수심5m"]
  *               pointStatus:
  *                 type: string
  *                 description: 포인트 항목 상태
@@ -72,13 +74,43 @@ router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
         }
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
+        const diveTagMstRepo = AppDataSource.getRepository(DiveTagMst);
+
         const newDivePoint = new DivePointMst();
 
         newDivePoint.pointName = pointName;
         newDivePoint.lat = lat;
         newDivePoint.lot = lot;
-        newDivePoint.tags = tags;
         newDivePoint.pointStatus = RequestStatus.PENDING;
+
+        const associatedTags: DiveTagMst[] = [];
+
+        if (tags && Array.isArray(tags)) {
+            for (const tagName of tags) {
+                let diveTag = await diveTagMstRepo.findOne({
+                    where: { name: tagName }, // Search for any tag, regardless of status
+                });
+
+                if (diveTag) {
+                    // If tag exists and is approved, associate it
+                    if (diveTag.tagStatus === RequestStatus.APPROVED) {
+                        associatedTags.push(diveTag);
+                    } else {
+                        // If tag exists but is PENDING, associate it
+                        associatedTags.push(diveTag);
+                    }
+                } else {
+                    // If tag does not exist, create a new PENDING DiveTagMst and associate it
+                    const newPendingDiveTag = new DiveTagMst();
+                    newPendingDiveTag.name = tagName;
+                    newPendingDiveTag.tagtype = 'user_defined'; // Default type for user-defined tags
+                    newPendingDiveTag.tagStatus = RequestStatus.PENDING;
+                    await diveTagMstRepo.save(newPendingDiveTag);
+                    associatedTags.push(newPendingDiveTag);
+                }
+            }
+        }
+        newDivePoint.tags = associatedTags;
 
         await divePointMstRepo.save(newDivePoint);
 
@@ -115,7 +147,8 @@ router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
         const divePoints = await divePointMstRepo.find({
             where: {
                 pointStatus: RequestStatus.APPROVED
-            }
+            },
+            relations: ["tags"], // Load associated tags
         });
         res.json(divePoints);
         
@@ -148,24 +181,25 @@ router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
  */
 router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // 승인, 미승인 필터 추가
     try {
-        const { status } = req.query;
+        const { pointStatus } = req.query;
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
         const whereClause: any = {}; 
-        if (status) {
+        if (pointStatus) {
 
-            const isValidStatus = Object.values(RequestStatus).includes(status as RequestStatus);
+            const isValidStatus = Object.values(RequestStatus).includes(pointStatus as RequestStatus);
 
             if (isValidStatus) {
 
-                whereClause.pointStatus = status as RequestStatus;
+                whereClause.pointStatus = pointStatus as RequestStatus;
             } else { // status값이 enum에 해당하지 않는 경우
                 return res.status(400).json({ message: '유효하지 않은 status 값입니다.' });
             }
         }
         
         const divePoints = await divePointMstRepo.find({
-            where: whereClause
+            where: whereClause,
+            relations: ["tags"], // Load associated tags
         });
         
         res.json(divePoints);
@@ -197,7 +231,7 @@ router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // �
  *           schema:
  *             type: object
  *             properties:
- *               status:
+ *               pointStatus:
  *                 type: string
  *                 description: 업데이트할 포인트 상태
  *                 enum: [PENDING, APPROVED, REJECTED]
@@ -212,7 +246,7 @@ router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // �
  *               properties:
  *                 message:
  *                   type: string
- *                   example: DivePoint status updated successfully
+ *                   example: DivePoint pointStatus updated successfully
  *                 divePoint:
  *                   $ref: '#/components/schemas/DivePointMst'
  *       '400':
@@ -225,24 +259,59 @@ router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // �
 router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Response) => {
     try {
         const pointId = parseInt(req.params.id, 10);
-        const { status } = req.body;
+        const { pointStatus, tags } = req.body; // Also get tags for potential update
 
         if (isNaN(pointId)) {
             return res.status(400).json({ message: '유효하지 않은 포인트 ID입니다.' });
         }
 
-        if (!status || !Object.values(RequestStatus).includes(status)) {
+        if (!pointStatus || !Object.values(RequestStatus).includes(pointStatus)) {
             return res.status(400).json({ message: '유효하지 않거나 누락된 상태 값입니다.' });
         }
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
-        const divePoint = await divePointMstRepo.findOneBy({ id: pointId });
+        const diveTagMstRepo = AppDataSource.getRepository(DiveTagMst);
+
+        const divePoint = await divePointMstRepo.findOne({
+            where: { id: pointId },
+            relations: ["tags"], // Load existing tags
+        });
 
         if (!divePoint) {
             return res.status(404).json({ message: '해당 ID의 다이빙 포인트를 찾을 수 없습니다.' });
         }
 
-        divePoint.pointStatus = status;
+        divePoint.pointStatus = pointStatus;
+
+        // Handle tags update if provided
+        if (tags && Array.isArray(tags)) {
+            const associatedTags: DiveTagMst[] = [];
+            for (const tagName of tags) {
+                let diveTag = await diveTagMstRepo.findOne({
+                    where: { name: tagName }, // Search for any tag, regardless of status
+                });
+
+                if (diveTag) {
+                    // If tag exists and is approved, associate it
+                    if (diveTag.tagStatus === RequestStatus.APPROVED) {
+                        associatedTags.push(diveTag);
+                    } else {
+                        // If tag exists but is PENDING, associate it
+                        associatedTags.push(diveTag);
+                    }
+                } else {
+                    // If tag does not exist, create a new PENDING DiveTagMst and associate it
+                    const newPendingDiveTag = new DiveTagMst();
+                    newPendingDiveTag.name = tagName;
+                    newPendingDiveTag.tagtype = 'user_defined'; // Default type for user-defined tags
+                    newPendingDiveTag.tagStatus = RequestStatus.PENDING;
+                    await diveTagMstRepo.save(newPendingDiveTag);
+                    associatedTags.push(newPendingDiveTag);
+                }
+            }
+            divePoint.tags = associatedTags;
+        }
+
         await divePointMstRepo.save(divePoint);
 
         res.status(200).json({ message: '다이빙 포인트 상태가 성공적으로 업데이트되었습니다.', divePoint: divePoint });
@@ -312,22 +381,18 @@ router.delete('/Delete_DivePointMstTag_V1/:id', async (req: Request, res: Respon
         }
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
-        const divePoint = await divePointMstRepo.findOneBy({ id: pointId });
+        const divePoint = await divePointMstRepo.findOne({
+            where: { id: pointId },
+            relations: ["tags"], // Load associated tags
+        });
 
         if (!divePoint) {
             return res.status(404).json({ message: '해당 ID의 다이빙 포인트를 찾을 수 없습니다.' });
         }
 
-        let tagsArray = divePoint.tags ? divePoint.tags.split(',').map(tag => tag.trim()) : [];
-        const initialLength = tagsArray.length;
+        // Filter out the tag to delete
+        divePoint.tags = divePoint.tags.filter(tag => tag.name !== tagToDelete);
 
-        tagsArray = tagsArray.filter(tag => tag !== tagToDelete);
-
-        if (tagsArray.length === initialLength) {
-            return res.status(404).json({ message: '삭제할 태그를 찾을 수 없습니다.' });
-        }
-
-        divePoint.tags = tagsArray.join(',');
         await divePointMstRepo.save(divePoint);
 
         res.status(200).json({ message: '태그가 성공적으로 삭제되었습니다.', divePoint: divePoint });

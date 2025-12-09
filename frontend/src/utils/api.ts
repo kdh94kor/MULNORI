@@ -30,7 +30,7 @@ export const fetchSeaConditionData = async (menuType: string) => {
 // 게시판 카테고리 불러오기
 export const fetchCategories = async () => {
     try {
-        const response = await fetch('/categories');
+        const response = await fetch('/api/categories');
         if (!response.ok) {
             throw new Error(response.status + '');
         }
@@ -73,20 +73,39 @@ export const fetchBoardList = async () => {
 };
 
 // DivePointMst 데이터 불러오기
-export const fetchDivePointMst = async (status?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
+export const fetchDivePointMst = async (pointStatus?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     try {
         let url = '/api/Get_DivePointMst_V2';
-        if (status) {
-            url += `?status=${status}`;
+        if (pointStatus) {
+            url += `?pointStatus=${pointStatus}`;
         }
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! pointStatus: ${response.status}`);
         }
         const data = await response.json();
         return { success: true, data };
     } catch (error: any) {
         console.error('DivePointMst 데이터를 불러오는 중 오류가 발생했습니다.', error);
+        return { success: false, message: error.message };
+    }
+};
+
+// DiveTagMst 데이터 불러오기
+export const fetchDiveTagMst = async (tagStatus?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
+    try {
+        let url = '/api/tags/Get_TagMst_V2';
+        if (tagStatus) {
+            url += `?tagStatus=${tagStatus}`;
+        }
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! tagStatus: ${response.status}`);
+        }
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('DiveTagMst 데이터를 불러오는 중 오류가 발생했습니다.', error);
         return { success: false, message: error.message };
     }
 };
