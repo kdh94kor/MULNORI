@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Link 임포트
+import { Link } from 'react-router-dom';
 import styles from './BuddyBoard.module.css';
 import PostEditor from '../PostEditor/PostEditor';
 import { fetchBoardList, fetchCategoriesByParent, createPost } from '../../utils/api';
+import Swal from 'sweetalert2';
+import { useAuth } from '../../context/AuthContext';
 
 interface Post {
   id: number;
@@ -14,6 +16,7 @@ interface Post {
 }
 
 const BuddyBoard: React.FC = () => {
+  const { user, dbUser, dbUserLoading } = useAuth();
 
   const [viewMode, setViewMode] = useState<'list' | 'write'>('list');
   const [posts, setPosts] = useState<Post[]>([]);
@@ -34,8 +37,9 @@ const BuddyBoard: React.FC = () => {
     loadData();
   }, []);
 
+
   const handlePostSubmit = async (newPostData: { categoryId: number; title: string; content: string; }) => {
-    const postWithAuthor = { ...newPostData, author: '현재사용자' }; 
+    const postWithAuthor = { ...newPostData, author: dbUser?.name || '' }; 
     const result = await createPost(postWithAuthor);
 
     if (result.success) {
@@ -45,8 +49,24 @@ const BuddyBoard: React.FC = () => {
         }
         setViewMode('list');
     } else {
-        alert(`게시글 등록에 실패했습니다: ${result.message}`);
+        Swal.fire({ title: '다이빙 가보자고', text: `게시글 등록에 실패했습니다: ${result.message}`, icon: 'error' });
     }
+  };
+
+  const handleWriteClick = () => {
+    if (!user) {
+      Swal.fire({ title: '다이빙 가보자고', text: '글을 작성하려면 로그인이 필요합니다.', icon: 'warning' });
+      return;
+    }
+    if (dbUserLoading) {
+      Swal.fire({ title: '다이빙 가보자고', text: '사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.', icon: 'info' });
+      return;
+    }
+    if (!dbUser?.name) {
+      Swal.fire({ title: '다이빙 가보자고', text: '사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.', icon: 'error' });
+      return;
+    }
+    setViewMode('write');
   };
 
   if (viewMode === 'write') {
@@ -57,7 +77,7 @@ const BuddyBoard: React.FC = () => {
     <div className={styles.boardContainer}>
       <div className={styles.boardHeader}>
         <h1 className={styles.boardTitle}>버디구하기</h1>
-        <button onClick={() => setViewMode('write')} className={styles.writeButton}>글쓰기</button>
+        <button onClick={handleWriteClick} className={styles.writeButton}>글쓰기</button>
       </div>
       <table className={styles.boardTable}>
         <thead>

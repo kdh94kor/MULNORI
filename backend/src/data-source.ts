@@ -6,12 +6,7 @@ import { TagDeletionRequest } from "./entity/TagDeletionRequest";
 import { BoardCategoryMaster } from "./entity/BoardCategoryMaster";
 import { DiveTagMst } from "./entity/DiveTagMst";
 import { Board } from "./entity/Board";
-import * as fs from 'fs';
-
-const pemPath = process.env.PEM_LOCATE;
-if (!pemPath) {
-  throw new Error("pem을 찾을 수 없습니다.");
-}
+import { User } from "./entity/User";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -20,12 +15,12 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  synchronize: true, 
+  synchronize: true,
   logging: false,
-  entities: [DivePoint, DivePointMst, TagDeletionRequest, Board, BoardCategoryMaster, DiveTagMst],
+  entities: [DivePoint, DivePointMst, TagDeletionRequest, Board, BoardCategoryMaster, DiveTagMst, User],
   migrations: [],
   subscribers: [],
-  ssl: { 
-     ca: fs.readFileSync(pemPath).toString(), 
+  ssl: {
+    rejectUnauthorized: false
   }
 });

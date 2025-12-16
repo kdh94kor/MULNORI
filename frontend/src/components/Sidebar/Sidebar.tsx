@@ -7,9 +7,10 @@ interface SidebarProps {
     toggleSidebar: () => void;
     activeMenuItem: string | null;
     onMenuItemClick: (menuType: string) => void;
+    userRole?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMenuItem, onMenuItemClick }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMenuItem, onMenuItemClick, userRole }) => {
     return (
         <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
             <div className={styles.sidebarHeader}>
@@ -39,16 +40,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, activeMen
                         <span className={styles.menuText}>버디구해요</span>
                     </li>
                 </Link>
-                <Link to="/settings" className={styles.menuLink}>
-                    <li
-                        className={`${styles.menuItem} ${activeMenuItem === 'settings' ? styles.active : ''}`}
-                        onClick={() => onMenuItemClick('settings')}
-                        data-menu="settings"
-                    >
-                        <span className={styles.menuIcon}>⚙️</span>
-                        <span className={styles.menuText}>설정</span>
-                    </li>
-                </Link>
+                {userRole === 'MASTER' && (
+                    <Link to="/settings" className={styles.menuLink}>
+                        <li
+                            className={`${styles.menuItem} ${activeMenuItem === 'settings' ? styles.active : ''}`}
+                            onClick={() => onMenuItemClick('settings')}
+                            data-menu="settings"
+                        >
+                            <span className={styles.menuIcon}>⚙️</span>
+                            <span className={styles.menuText}>설정</span>
+                        </li>
+                    </Link>
+                )}
             </ul>
         </div>
     );

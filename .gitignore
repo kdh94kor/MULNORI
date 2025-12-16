@@ -33,3 +33,6 @@ Thumbs.db
 *.sln
 *.sw?
 *.pem
+
+# ngrok config (contains authtoken)
+ngrok.yml

@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import multer from 'multer';
-import { uploadToS3 } from '../utils/s3-uploader';
+import { uploadToSupabase } from '../utils/supabase-uploader';
 
 const router: Router = express.Router();
 
@@ -10,7 +10,7 @@ const upload = multer({ storage: storage });
 
 /**
  * @route   POST /api/upload/image
- * @desc    이미지를 S3에 업로드
+ * @desc    이미지를 Supabase Storage에 업로드
  * @access  Public
  */
 router.post('/image', upload.single('image'), async (req: Request, res: Response) => {
@@ -19,7 +19,7 @@ router.post('/image', upload.single('image'), async (req: Request, res: Response
     }
 
     try {
-        const imageUrl = await uploadToS3(req.file);
+        const imageUrl = await uploadToSupabase(req.file);
         return res.status(200).json({ imageUrl });
     } catch (error) {
         console.error(error);

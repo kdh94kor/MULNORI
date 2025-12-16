@@ -60,7 +60,7 @@ export const fetchCategoriesByParent = async (parentName: string) => {
 // 게시판 목록 불러오기
 export const fetchBoardList = async () => {
     try {
-        const response = await fetch('/api/get_board_list_V1');
+        const response = await fetch('/api/boards');
         if (!response.ok) {
             throw new Error(response.status + '');
         }
@@ -75,7 +75,7 @@ export const fetchBoardList = async () => {
 // DivePointMst 데이터 불러오기
 export const fetchDivePointMst = async (pointStatus?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     try {
-        let url = '/api/Get_DivePointMst_V2';
+        let url = '/api/dive-points/filter';
         if (pointStatus) {
             url += `?pointStatus=${pointStatus}`;
         }
@@ -94,7 +94,7 @@ export const fetchDivePointMst = async (pointStatus?: 'PENDING' | 'APPROVED' | '
 // DiveTagMst 데이터 불러오기
 export const fetchDiveTagMst = async (tagStatus?: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     try {
-        let url = '/api/tags/Get_TagMst_V2';
+        let url = '/api/tags';
         if (tagStatus) {
             url += `?tagStatus=${tagStatus}`;
         }
@@ -113,7 +113,7 @@ export const fetchDiveTagMst = async (tagStatus?: 'PENDING' | 'APPROVED' | 'REJE
 // 새 게시글 등록
 export const createPost = async (postData: { title: string; content: string; categoryId: number; author: string; }) => {
     try {
-        const response = await fetch('/api/post_board_V1', {
+        const response = await fetch('/api/boards', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -135,27 +135,27 @@ export const createPost = async (postData: { title: string; content: string; cat
 };
 
 // 게시글 읽어오기
-export const getContent = async(id: string) => {
-    
+export const getContent = async (id: string) => {
+
     try {
 
-        const response = await fetch(`/api/get_board_content_v1/${id}`);
+        const response = await fetch(`/api/boards/${id}`);
 
-        if (!response.ok){
+        if (!response.ok) {
             const errorData = await response.json().catch(() => null);
             throw new Error(errorData?.message);
         }
-        
+
         const data = await response.json();
-        return {success: true, data};
+        return { success: true, data };
 
     } catch (error: any) {
-        console.log('게시글 조회 실패 ',error);
-        return { success: false, message: error.message};
+        console.log('게시글 조회 실패 ', error);
+        return { success: false, message: error.message };
     }
 
 
-} ;
+};
 
 // 이미지 업로드
 export const uploadImage = async (file: File) => {
