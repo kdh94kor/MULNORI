@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 interface InfoWindowContentProps {
     point: {
@@ -6,7 +7,7 @@ interface InfoWindowContentProps {
         lat: number;
         lot: number;
         pointName: string;
-        tags?: { id: number; name: string; tagtype: string; tagStatus: string; }[]; // Updated type
+        tags?: { id: number; name: string; tagtype?: string; tagStatus?: string; }[];
         pointStatus: "PENDING" | "APPROVED" | "REJECTED";
     };
     onTagDelete: (pointId: number, tagToDelete: string) => void;
@@ -18,22 +19,30 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
     const [isAddingTag, setIsAddingTag] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const handleTagDelete = (tag: string) => {
-        if (window.confirm(`'${tag}' 태그를 삭제하시겠습니까?`)) {
-            if (point.id) {
-                onTagDelete(point.id, tag);
-            }
+    const handleTagDelete = async (tag: string) => {
+        const result = await Swal.fire({
+            title: '다이빙 가보자고',
+            text: `'${tag}' 태그를 삭제하시겠습니까?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소'
+        });
+        if (result.isConfirmed && point.id) {
+            onTagDelete(point.id, tag);
         }
     };
 
-    const tagsArray = point.tags ? point.tags.map(tag => tag.name) : []; // Updated logic
+    const tagsArray: string[] = point.tags
+        ? point.tags.map(tag => tag.name).filter(name => name)
+        : [];
 
     const handleTagAdd = () => {
         if (newTag.trim() && !tagsArray.includes(newTag.trim()) && point.id) {
             onTagAdd(point.id, newTag.trim());
             setNewTag('');
         } else if (tagsArray.includes(newTag.trim())) {
-            alert('이미 존재하는 태그입니다.');
+            Swal.fire({ title: '다이빙 가보자고', text: '이미 존재하는 태그입니다.', icon: 'warning' });
         }
     };
 

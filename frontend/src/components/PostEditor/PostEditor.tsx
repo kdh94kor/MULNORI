@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './PostEditor.module.css';
+import Swal from 'sweetalert2';
 
 // Props for the PostEditor component
 interface PostEditorProps {
@@ -21,11 +22,11 @@ const PostEditor: React.FC<PostEditorProps> = ({ onCancel, onSubmit, categories 
 
   const handleSubmit = () => {
     if (!categoryId) {
-      alert('모집유형을 선택해주세요.');
+      Swal.fire({ title: '다이빙 가보자고', text: '모집유형을 선택해주세요.', icon: 'warning' });
       return;
     }
     if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 모두 입력해주세요.');
+      Swal.fire({ title: '다이빙 가보자고', text: '제목과 내용을 모두 입력해주세요.', icon: 'warning' });
       return;
     }
     onSubmit({ categoryId: Number(categoryId), title, content });

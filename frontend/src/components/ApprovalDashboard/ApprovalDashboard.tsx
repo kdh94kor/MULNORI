@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import styles from './ApprovalDashboard.module.css';
 import { fetchDivePointMst, fetchDiveTagMst } from '../../utils/api';
 import type { components } from '../../types/api';
+import Swal from 'sweetalert2';
+import CategoryManagement from '../Settings/CategoryManagement';
 
 type DivePointMst = components['schemas']['DivePointMst'];
-type DiveTagMst = components['schemas']['DiveTagMst']; // Updated type
+type TagApproval = components['schemas']['TagApproval'];
 
 const ApprovalDashboard: React.FC = () => {
   const [pointRequests, setPointRequests] = useState<DivePointMst[]>([]);
-  const [tagRequests, setTagRequests] = useState<DiveTagMst[]>([]); // Updated state type
+  const [tagRequests, setTagRequests] = useState<TagApproval[]>([]);
 
   useEffect(() => {
     const loadPendingRequests = async () => {
@@ -20,9 +22,9 @@ const ApprovalDashboard: React.FC = () => {
         console.error(divePointResult.message);
       }
 
-      const tagResult = await fetchDiveTagMst('PENDING'); // Updated fetch function
+      const tagResult = await fetchDiveTagMst('PENDING');
       if (tagResult.success) {
-        setTagRequests(tagResult.data as DiveTagMst[]); // Updated state setter
+        setTagRequests(tagResult.data as TagApproval[]);
       } else {
         console.error(tagResult.message);
       }
@@ -52,7 +54,7 @@ const ApprovalDashboard: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/Update_DivePointMstStatus_V1/${id}`, {
+      const response = await fetch(`/api/dive-points/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -66,11 +68,11 @@ const ApprovalDashboard: React.FC = () => {
       }
 
       setPointRequests(prevRequests => prevRequests.filter(req => req.id !== id));
-      alert(`${id}포인트를 ${korStatus}(으)로 변경하였습니다.`);
+      Swal.fire({ title: '다이빙 가보자고', text: `${id}포인트를 ${korStatus}(으)로 변경하였습니다.`, icon: 'success' });
 
     } catch (error: any) {
       console.error('Error updating dive point status:', error);
-      alert(`상태 변경 실패: ${error.message}`);
+      Swal.fire({ title: '다이빙 가보자고', text: `상태 변경 실패: ${error.message}`, icon: 'error' });
     }
   };
 
@@ -96,7 +98,7 @@ const ApprovalDashboard: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/tags/Update_tagsMstStatus_V1/${id}`, {
+      const response = await fetch(`/api/tags/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -110,11 +112,11 @@ const ApprovalDashboard: React.FC = () => {
       }
 
       setTagRequests(prevRequests => prevRequests.filter(req => req.id !== id));
-      alert(`${id}태그를 ${korStatus}(으)로 변경하였습니다.`);
+      Swal.fire({ title: '다이빙 가보자고', text: `${id}태그를 ${korStatus}(으)로 변경하였습니다.`, icon: 'success' });
 
     } catch (error: any) {
       console.error('Error updating tags status:', error);
-      alert(`상태 변경 실패: ${error.message}`);
+      Swal.fire({ title: '다이빙 가보자고', text: `상태 변경 실패: ${error.message}`, icon: 'error' });
     }
   };
 
@@ -143,16 +145,13 @@ const ApprovalDashboard: React.FC = () => {
               <td>{req.lat}</td>
               <td>{req.lot}</td>
               <td>
-                {req.tags && req.tags.length > 0 ? (
-                  req.tags.map((tag, index) => (
-                    <span key={tag.id || index} className={styles.tagItem}>
-                      {tag.name}
-                      {index < req.tags.length - 1 ? ', ' : ''}
-                    </span>
-                  ))
-                ) : (
-                  'N/A'
-                )}
+                {(() => {
+                  const tags = req.tags as any;
+                  if (!tags) return 'N/A';
+                  if (typeof tags === 'string') return tags;
+                  if (Array.isArray(tags)) return tags.map((t: any) => t.name || t).join(', ');
+                  return 'N/A';
+                })()}
               </td>
               <td>
                 <span className={`${styles.status} ${styles[req.pointStatus?.toLowerCase() || '']}`}>
@@ -187,7 +186,7 @@ const ApprovalDashboard: React.FC = () => {
           {tagRequests.map((req) => (
             <tr key={req.id}>
               <td>{req.id}</td>
-              <td>{req.name}</td>
+              <td>{(req as any).name || req.tagName || 'N/A'}</td>
               <td>
                 <span className={`${styles.status} ${styles[req.tagStatus?.toLowerCase() || '']}`}>
                   {req.tagStatus}
@@ -206,6 +205,10 @@ const ApprovalDashboard: React.FC = () => {
           ))}
         </tbody>
       </table>
+
+      <section className={styles.section}>
+        <CategoryManagement />
+      </section>
     </div>
   );
 };

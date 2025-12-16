@@ -4,7 +4,7 @@ import InfoPanel from '../InfoPanel/InfoPanel';
 import { fetchDivePointMst } from '../../utils/api';
 import InfoWindowContent from './InfoWindowContent';
 import ReactDOM from 'react-dom/client';
-import type { components } from '../../types/api';
+import Swal from 'sweetalert2';
 
 //DivePoint entity와는 구조를 다르게 가자
 interface DivePoint {
@@ -22,7 +22,23 @@ interface DivePoint {
     lastScr: number;
 }
 
-type DivePointMst = components['schemas']['DivePointMst'];
+// 태그 인터페이스 (실제 API 응답에 맞춤)
+interface DiveTagMst {
+    id: number;
+    name: string;
+    tagtype?: string;
+    tagStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+// DivePointMst 인터페이스 (실제 API 응답에 맞춤)
+interface DivePointMst {
+    id: number;
+    lat: number;
+    lot: number;
+    pointName: string;
+    tags: DiveTagMst[];
+    pointStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
 
 declare global {
     interface Window {
@@ -64,9 +80,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const [currentPage, setCurrentPage] = useState(1);
     const [dataError, setMapNotice] = useState<string | null>(null);
 
-    const [markerInfoWindows, setMarkerInfoWindows] = useState<Map<number, { marker: any, infowindow: any }>>(new Map());
-    const [openInfoWindowPointId, setOpenInfoWindowPointId] = useState<number | null>(null);
-
     // --- 포인트 등록 관련 상태 ---
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, lat: 0, lot: 0 });
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -88,12 +101,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
   
     const handleTagDelete = async (pointId: number, tagToDelete: string) => {
         try {
-            const response = await fetch(`/api/tags/request-deletion`, {
-                method: 'POST',
+            const response = await fetch(`/api/dive-points/${pointId}/tags`, {
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ divePointId: pointId, tagName: tagToDelete }),
+                body: JSON.stringify({ tagToDelete: tagToDelete }),
             });
 
             const result = await response.json();
@@ -103,24 +116,36 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
             }
 
             setDivePointMsts(prevMsts =>
-                prevMsts.map(point =>
-                    point.id === pointId
-                        ? { ...point, tags: (point.tags || '').split(',').filter(tag => tag.trim() !== tagToDelete).join(',') }
-                        : point
-                )
+                prevMsts.map(point => {
+                    if (point.id !== pointId) return point;
+                    
+                    // tags가 배열인 경우 삭제된 태그 필터링
+                    if (Array.isArray(point.tags)) {
+                        return { 
+                            ...point, 
+                            tags: point.tags.filter(tag => tag.name !== tagToDelete)
+                        };
+                    }
+                    return point;
+                })
             );
-            alert('태그가 성공적으로 삭제되었습니다.');
 
+            // 현재 열려있는 InfoWindow 닫기 (마커 재클릭 시 업데이트된 내용 표시)
+            if (window.currentInfoWindow) {
+                window.currentInfoWindow.close();
+            }
+
+            Swal.fire({ title: '다이빙 가보자고', text: '태그가 성공적으로 삭제되었습니다.', icon: 'success' });
 
         } catch (error: any) {
-            console.error('태그 삭제 요청 중 오류 발생:', error);
-            alert(`태그 삭제 요청 실패: ${error.message}`);
+            console.error('태그 삭제 중 오류 발생:', error);
+            Swal.fire({ title: '다이빙 가보자고', text: `태그 삭제 실패: ${error.message}`, icon: 'error' });
         }
     };
 
     const handleTagAdd = async (pointId: number, newTag: string) => {
         try {
-            const response = await fetch('/api/tags/request', {
+            const response = await fetch('/api/tags/requests', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -137,11 +162,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 throw new Error(result.message || '태그 추가 요청에 실패했습니다.');
             }
 
-            alert(result.message);
+            Swal.fire({ title: '다이빙 가보자고', text: result.message, icon: 'success' });
 
         } catch (error: any) {
             console.error('Error requesting tag addition:', error);
-            alert(error.message);
+            Swal.fire({ title: '다이빙 가보자고', text: error.message, icon: 'error' });
         }
     };
     const addMarkers = (points: DivePoint[], divePointMsts: DivePointMst[]) => {
@@ -286,11 +311,10 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const loadDivePointData = async (page: number) => {
         try {
             setMapNotice(null); 
-            const response = await fetch(`/api/Get_DivePoint_V1?pageNo=${page}`);
+            const response = await fetch(`/api/dive-points/forecast?pageNo=${page}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            console.log(`응답 : ${response}`);
 
             const data: DivePoint[] = await response.json();
 
@@ -302,7 +326,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 }
             } else {
                 if (page > 1) {
-                    alert('더 이상 불러올 데이터가 없습니다.');
+                    Swal.fire({ title: '다이빙 가보자고', text: '더 이상 불러올 데이터가 없습니다.', icon: 'info' });
                 }
             }
         } catch (error: any) {
@@ -316,7 +340,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const addDivePointData = async (pointData: AddDivePoint) =>{
         
         try{
-            const response = await fetch(`/api/Set_DivePointMst_V1`, {
+            const response = await fetch(`/api/dive-points`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -460,12 +484,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!pointName.trim()) {
-            alert('포인트 이름을 입력해주세요.');
+            Swal.fire({ title: '다이빙 가보자고', text: '포인트 이름을 입력해주세요.', icon: 'warning' });
             return;
         }
 
         if (!pointCoords){
-            alert('포인트에 대한 위치정보(위도, 경도)값이 없습니다. 다시 등록해주세요.');
+            Swal.fire({ title: '다이빙 가보자고', text: '포인트에 대한 위치정보(위도, 경도)값이 없습니다. 다시 등록해주세요.', icon: 'warning' });
             return;
         }
 
@@ -476,14 +500,13 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 pointName: pointName,
                 tags: tags
             };
-            console.log(`${newPointData.lat},${newPointData.lot},${newPointData.pointName},${newPointData.tags}`);
             await addDivePointData(newPointData);
 
-            alert('🎉포인트 등록 요청이 정상적으로 완료되었습니다!🎉\n\n🕵️‍♀️담당자 검토 후 반영됩니다!✨');
+            Swal.fire({ title: '다이빙 가보자고', text: '🎉포인트 등록 요청이 정상적으로 완료되었습니다!🎉 담당자 검토 후 반영됩니다!✨', icon: 'success' });
             setIsFormOpen(false);
 
         }catch(error: any){
-            alert(`포인트 등록 요청 실패ㅠ: ${error.message}`);
+            Swal.fire({ title: '다이빙 가보자고', text: `포인트 등록 요청 실패: ${error.message}`, icon: 'error' });
         }
     };
 

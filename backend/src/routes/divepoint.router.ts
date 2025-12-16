@@ -8,7 +8,7 @@ const router = Router();
 
 /**
  * @swagger
- * /Get_DivePoint_V1:
+ * /dive-points/forecast:
  *   get:
  *     summary: 다이빙 포인트 정보 조회
  *     description: 공공데이터 포털의 스킨스쿠버 지수 API를 이용해 다이빙 포인트 정보를 가져옵니다.
@@ -47,7 +47,7 @@ const router = Router();
  *                   example: 500 error
  */
 
-router.get('/Get_DivePoint_V1', async (req: Request, res: Response) => {
+router.get('/dive-points/forecast', async (req: Request, res: Response) => {
     const { pageNo = '1', numOfRows = '10' } = req.query;
     const apiKey = process.env.OPENAPI_DIVE_API_KEY;
 
@@ -77,38 +77,38 @@ router.get('/Get_DivePoint_V1', async (req: Request, res: Response) => {
     try {
 
         const response = await axios.get(`${apiUrl}?${params.toString()}`);
-        const result = response.data; 
+        const result = response.data;
 
         //실제 데이터 영역
         const dataSection = result?.response?.body?.items?.item;
 
         let itemArrays: DivePoint[] = [];
 
-        if (dataSection){ 
+        if (dataSection) {
             const itemsArray = Array.isArray(dataSection) ? dataSection : [dataSection];
 
-          itemArrays = itemsArray.map((item, index) => ({
-                      id: index,
-                      skscExpcnRgnNm: item.skscExpcnRgnNm,
-                      lat: parseFloat(item.lat),
-                      lot: parseFloat(item.lot),
-                      predcYmd: `${item.predcYmd} (${new Date(item.predcYmd).toLocaleDateString('ko-KR', { weekday: 'short' })})`,
-                      predcNoonSeCd: item.predcNoonSeCd === '일' ? '' : item.predcNoonSeCd, //먼 미래는 오전 오후 '일' 로만 들어와서 예외처리 
-                      tdlvHrCn: '',
-                      minWvhgt: item.minWvhgt,
-                      maxWvhgt: item.maxWvhgt,
-                      minWtem: item.minWtem,
-                      maxWtem: item.maxWtem,
-                      totalIndex: item.totalIndex,
-                      lastScr: parseFloat(item.lastScr)
-                     }));
-          itemArrays.sort((a, b) => {
-            const dateCompare = a.predcYmd.localeCompare(b.predcYmd);
-            if (dateCompare !== 0) {
-              return dateCompare;
-            }
-            return a.predcNoonSeCd.localeCompare(b.predcNoonSeCd);
-          });
+            itemArrays = itemsArray.map((item, index) => ({
+                id: index,
+                skscExpcnRgnNm: item.skscExpcnRgnNm,
+                lat: parseFloat(item.lat),
+                lot: parseFloat(item.lot),
+                predcYmd: `${item.predcYmd} (${new Date(item.predcYmd).toLocaleDateString('ko-KR', { weekday: 'short' })})`,
+                predcNoonSeCd: item.predcNoonSeCd === '일' ? '' : item.predcNoonSeCd, //먼 미래는 오전 오후 '일' 로만 들어와서 예외처리 
+                tdlvHrCn: '',
+                minWvhgt: item.minWvhgt,
+                maxWvhgt: item.maxWvhgt,
+                minWtem: item.minWtem,
+                maxWtem: item.maxWtem,
+                totalIndex: item.totalIndex,
+                lastScr: parseFloat(item.lastScr)
+            }));
+            itemArrays.sort((a, b) => {
+                const dateCompare = a.predcYmd.localeCompare(b.predcYmd);
+                if (dateCompare !== 0) {
+                    return dateCompare;
+                }
+                return a.predcNoonSeCd.localeCompare(b.predcNoonSeCd);
+            });
         }
 
         res.json(itemArrays);

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './MainLayout.module.css';
 import Sidebar from '../Sidebar/Sidebar';
 import MapComponent from '../MapComponent/MapComponent';
 import { fetchSeaConditionData } from '../../utils/api'; 
+import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface MainLayoutProps {
     children?: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+    const { user, dbUser, signOut } = useAuth();
 
     //사이드바 토글
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -57,6 +60,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 toggleSidebar={toggleSidebar}
                 activeMenuItem={activeMenuItem}
                 onMenuItemClick={handleMenuItemClick}
+                userRole={dbUser?.role || ''}
             />
 
             {/* 상단 */}
@@ -66,8 +70,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 ) : (
                     <>
                         <div className={styles.contentHeader}>
-                            <h1>아맞다 바다날씨</h1>
-                            <p>실시간 해양 정보를 확인하고 관리할 수 있습니다.</p>
+                            <div>
+                                <h1>다이빙 가보자고</h1>
+                                <p>🙏🙏다이빙 포인트를 공유해주세요🙏🙏</p>
+                            </div>
+                            <div className={styles.authButtons}>
+                                {user ? (
+                                    <>
+                                        <span style={{ marginRight: '10px', alignSelf: 'center', color: '#333' }}>{user.email}님</span>
+                                        <button onClick={signOut} className={`${styles.authBtn} ${styles.loginBtn}`}>로그아웃</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/login" className={`${styles.authBtn} ${styles.loginBtn}`}>로그인</Link>
+                                        <Link to="/signup" className={`${styles.authBtn} ${styles.signupBtn}`}>회원가입</Link>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         {/* 카카오 맵 지도 영역 */}
                         <MapComponent

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './CategoryManagement.module.css';
+import Swal from 'sweetalert2';
 
 interface Category {
   id: number;
@@ -27,7 +28,7 @@ const CategoryManagement: React.FC = () => {
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      alert('카테고리 불러오기 실패');
+      Swal.fire({ title: '다이빙 가보자고', text: '카테고리 불러오기 실패', icon: 'error' });
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ const CategoryManagement: React.FC = () => {
       setAddingParentId(null);
     } catch (error) {
       console.error('Error creating category:', error);
-      alert('카테고리 생성 실패');
+      Swal.fire({ title: '다이빙 가보자고', text: '카테고리 생성 실패', icon: 'error' });
     }
   };
 
@@ -71,12 +72,20 @@ const CategoryManagement: React.FC = () => {
       setEditingId(null);
     } catch (error) {
       console.error('Error updating category:', error);
-      alert('카테고리 수정 실패');
+      Swal.fire({ title: '다이빙 가보자고', text: '카테고리 수정 실패', icon: 'error' });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('정말 삭제하시겠습니까? 하위 카테고리도 함께 삭제될 수 있습니다.')) return;
+    const result = await Swal.fire({
+      title: '다이빙 가보자고',
+      text: '정말 삭제하시겠습니까? 하위 카테고리도 함께 삭제될 수 있습니다.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    });
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch(`/api/categories/${id}`, {
@@ -88,7 +97,7 @@ const CategoryManagement: React.FC = () => {
       await fetchCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('카테고리 삭제 실패');
+      Swal.fire({ title: '다이빙 가보자고', text: '카테고리 삭제 실패', icon: 'error' });
     }
   };
 

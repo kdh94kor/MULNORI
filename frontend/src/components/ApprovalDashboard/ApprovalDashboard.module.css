@@ -1,6 +1,9 @@
 .dashboardContainer {
     padding: 20px;
     background-color: #f4f6f8;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .title {
@@ -8,6 +11,26 @@
     font-weight: bold;
     margin-bottom: 20px;
     color: #333;
+}
+
+.subtitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.tableWrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
 }
 
 .requestTable {
@@ -28,6 +51,9 @@
     background-color: #e9ecef;
     font-weight: bold;
     color: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .status {
@@ -40,15 +66,18 @@
 }
 
 .status.pending {
-    background-color: #ffc107; /* Yellow */
+    background-color: #ffc107;
+    /* Yellow */
 }
 
 .status.approved {
-    background-color: #28a745; /* Green */
+    background-color: #28a745;
+    /* Green */
 }
 
 .status.rejected {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
+    /* Red */
 }
 
 .actions {

@@ -9,7 +9,7 @@ const router = Router();
 
 /**
  * @swagger
- * /Set_DivePointMst_V1:
+ * /dive-points:
  *   post:
  *     summary: 새로운 다이빙 포인트 등록 요청
  *     description: 등록 요청된 다이빙 포인트를 등록합니다.
@@ -65,12 +65,12 @@ const router = Router();
  *       '500':
  *         description: 서버 오류.
  */
-router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
+router.post('/dive-points', async (req: Request, res: Response) => {
     try {
-        const {lat, lot, pointName, tags } = req.body;
+        const { lat, lot, pointName, tags } = req.body;
 
-        if (!lat || !lot || !pointName ) {
-            return res.status(400).json({ message: '필요한 항목이 모두 입력되지 않았습니다.'} );
+        if (!lat || !lot || !pointName) {
+            return res.status(400).json({ message: '필요한 항목이 모두 입력되지 않았습니다.' });
         }
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
@@ -88,22 +88,15 @@ router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
         if (tags && Array.isArray(tags)) {
             for (const tagName of tags) {
                 let diveTag = await diveTagMstRepo.findOne({
-                    where: { name: tagName }, // Search for any tag, regardless of status
+                    where: { name: tagName },
                 });
 
                 if (diveTag) {
-                    // If tag exists and is approved, associate it
-                    if (diveTag.tagStatus === RequestStatus.APPROVED) {
-                        associatedTags.push(diveTag);
-                    } else {
-                        // If tag exists but is PENDING, associate it
-                        associatedTags.push(diveTag);
-                    }
+                    associatedTags.push(diveTag);
                 } else {
-                    // If tag does not exist, create a new PENDING DiveTagMst and associate it
                     const newPendingDiveTag = new DiveTagMst();
                     newPendingDiveTag.name = tagName;
-                    newPendingDiveTag.tagtype = 'user_defined'; // Default type for user-defined tags
+                    newPendingDiveTag.tagtype = 'user_defined';
                     newPendingDiveTag.tagStatus = RequestStatus.PENDING;
                     await diveTagMstRepo.save(newPendingDiveTag);
                     associatedTags.push(newPendingDiveTag);
@@ -124,7 +117,7 @@ router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /Get_DivePointMst_V1:
+ * /dive-points:
  *   get:
  *     summary: 저장된 다이빙 포인트 마스터 정보 조회
  *     description: 데이터베이스에 저장된 모든 다이빙 포인트 마스터 정보를 조회합니다.
@@ -141,17 +134,24 @@ router.post('/Set_DivePointMst_V1', async (req: Request, res: Response) => {
  *       '500':
  *         description: 서버 오류.
  */
-router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
+router.get('/dive-points', async (req: Request, res: Response) => {
     try {
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
         const divePoints = await divePointMstRepo.find({
             where: {
                 pointStatus: RequestStatus.APPROVED
             },
-            relations: ["tags"], // Load associated tags
+            relations: ["tags"],
         });
-        res.json(divePoints);
-        
+
+        // 승인된 태그만 필터링
+        const filteredDivePoints = divePoints.map(point => ({
+            ...point,
+            tags: point.tags.filter(tag => tag.tagStatus === RequestStatus.APPROVED)
+        }));
+
+        res.json(filteredDivePoints);
+
     } catch (error: any) {
         console.error('조회 오류:', error);
         res.status(500).json({ message: '다이빙 포인트 조회 중 오류 발생', error: error.message });
@@ -160,7 +160,7 @@ router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /Get_DivePointMst_V2:
+ * /dive-points/filter:
  *   get:
  *     summary: 저장된 다이빙 포인트 조회 V2
  *     description: 데이터베이스에 저장된 모든 다이빙 포인트 마스터 정보를 조회합니다. 승인여부 필터 적용됨
@@ -179,31 +179,34 @@ router.get('/Get_DivePointMst_V1', async (req: Request, res: Response) => {
  *       '500':
  *         description: 서버 오류.
  */
-router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // 승인, 미승인 필터 추가
+router.get('/dive-points/filter', async (req: Request, res: Response) => {
     try {
         const { pointStatus } = req.query;
 
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
-        const whereClause: any = {}; 
+        const whereClause: any = {};
         if (pointStatus) {
-
             const isValidStatus = Object.values(RequestStatus).includes(pointStatus as RequestStatus);
-
             if (isValidStatus) {
-
                 whereClause.pointStatus = pointStatus as RequestStatus;
-            } else { // status값이 enum에 해당하지 않는 경우
+            } else {
                 return res.status(400).json({ message: '유효하지 않은 status 값입니다.' });
             }
         }
-        
+
         const divePoints = await divePointMstRepo.find({
             where: whereClause,
-            relations: ["tags"], // Load associated tags
+            relations: ["tags"],
         });
-        
-        res.json(divePoints);
-        
+
+        // 승인된 태그만 필터링
+        const filteredDivePoints = divePoints.map(point => ({
+            ...point,
+            tags: point.pointStatus === RequestStatus.PENDING ? point.tags : point.tags.filter(tag => tag.tagStatus === RequestStatus.APPROVED)
+        }));
+
+        res.json(filteredDivePoints);
+
     } catch (error: any) {
         console.error('조회 오류:', error);
         res.status(500).json({ message: '다이빙 포인트 조회 중 오류 발생', error: error.message });
@@ -212,7 +215,7 @@ router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // �
 
 /**
  * @swagger
- * /Update_DivePointMstStatus_V1/{id}:
+ * /dive-points/{id}/status:
  *   patch:
  *     summary: 다이빙 포인트 상태 업데이트
  *     description: 특정 다이빙 포인트의 승인 상태를 업데이트합니다.
@@ -256,10 +259,10 @@ router.get('/Get_DivePointMst_V2', async (req: Request, res: Response) => { // �
  *       '500':
  *         description: 서버 오류.
  */
-router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Response) => {
+router.patch('/dive-points/:id/status', async (req: Request, res: Response) => {
     try {
         const pointId = parseInt(req.params.id, 10);
-        const { pointStatus, tags } = req.body; // Also get tags for potential update
+        const { pointStatus, tags } = req.body;
 
         if (isNaN(pointId)) {
             return res.status(400).json({ message: '유효하지 않은 포인트 ID입니다.' });
@@ -274,7 +277,7 @@ router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Resp
 
         const divePoint = await divePointMstRepo.findOne({
             where: { id: pointId },
-            relations: ["tags"], // Load existing tags
+            relations: ["tags"],
         });
 
         if (!divePoint) {
@@ -283,27 +286,19 @@ router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Resp
 
         divePoint.pointStatus = pointStatus;
 
-        // Handle tags update if provided
         if (tags && Array.isArray(tags)) {
             const associatedTags: DiveTagMst[] = [];
             for (const tagName of tags) {
                 let diveTag = await diveTagMstRepo.findOne({
-                    where: { name: tagName }, // Search for any tag, regardless of status
+                    where: { name: tagName },
                 });
 
                 if (diveTag) {
-                    // If tag exists and is approved, associate it
-                    if (diveTag.tagStatus === RequestStatus.APPROVED) {
-                        associatedTags.push(diveTag);
-                    } else {
-                        // If tag exists but is PENDING, associate it
-                        associatedTags.push(diveTag);
-                    }
+                    associatedTags.push(diveTag);
                 } else {
-                    // If tag does not exist, create a new PENDING DiveTagMst and associate it
                     const newPendingDiveTag = new DiveTagMst();
                     newPendingDiveTag.name = tagName;
-                    newPendingDiveTag.tagtype = 'user_defined'; // Default type for user-defined tags
+                    newPendingDiveTag.tagtype = 'user_defined';
                     newPendingDiveTag.tagStatus = RequestStatus.PENDING;
                     await diveTagMstRepo.save(newPendingDiveTag);
                     associatedTags.push(newPendingDiveTag);
@@ -324,7 +319,7 @@ router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Resp
 
 /**
  * @swagger
- * /Delete_DivePointMstTag_V1/{id}:
+ * /dive-points/{id}/tags:
  *   delete:
  *     summary: 다이빙 포인트 태그 삭제
  *     description: 특정 다이빙 포인트에서 지정된 태그를 삭제합니다.
@@ -367,7 +362,7 @@ router.patch('/Update_DivePointMstStatus_V1/:id', async (req: Request, res: Resp
  *       '500':
  *         description: 서버 오류.
  */
-router.delete('/Delete_DivePointMstTag_V1/:id', async (req: Request, res: Response) => {
+router.delete('/dive-points/:id/tags', async (req: Request, res: Response) => {
     try {
         const pointId = parseInt(req.params.id, 10);
         const { tagToDelete } = req.body;
@@ -383,14 +378,13 @@ router.delete('/Delete_DivePointMstTag_V1/:id', async (req: Request, res: Respon
         const divePointMstRepo = AppDataSource.getRepository(DivePointMst);
         const divePoint = await divePointMstRepo.findOne({
             where: { id: pointId },
-            relations: ["tags"], // Load associated tags
+            relations: ["tags"],
         });
 
         if (!divePoint) {
             return res.status(404).json({ message: '해당 ID의 다이빙 포인트를 찾을 수 없습니다.' });
         }
 
-        // Filter out the tag to delete
         divePoint.tags = divePoint.tags.filter(tag => tag.name !== tagToDelete);
 
         await divePointMstRepo.save(divePoint);

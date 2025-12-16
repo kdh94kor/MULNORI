@@ -17,7 +17,7 @@ body {
     color: white;
     transition: width 0.3s ease;
     overflow: hidden;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar.collapsed {
@@ -26,8 +26,8 @@ body {
 
 .sidebarHeader {
     padding: 20px;
-    background: rgba(0,0,0,0.1);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .toggleBtn {
@@ -62,7 +62,7 @@ body {
 }
 
 .menuItem:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-left-color: #3498db;
 }
 
@@ -91,6 +91,46 @@ body {
     background: #ecf0f1;
     padding: 20px;
     border-bottom: 1px solid #bdc3c7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.authButtons {
+    display: flex;
+    gap: 1rem;
+}
+
+.authBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loginBtn {
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.loginBtn:hover {
+    background-color: #e6f2ff;
+}
+
+.signupBtn {
+    background-color: #007bff;
+    color: white;
+}
+
+.signupBtn:hover {
+    background-color: #0056b3;
 }
 
 .mapContainer {
@@ -111,7 +151,7 @@ body {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     min-width: 300px;
     max-height: 400px;
     overflow-y: auto;

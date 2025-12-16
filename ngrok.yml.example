@@ -1,0 +1,21 @@
+# ngrok 설정 예시 파일
+# 1. 이 파일을 ngrok.yml로 복사하세요
+# 2. YOUR_AUTHTOKEN_HERE를 실제 ngrok authtoken으로 교체하세요
+# authtoken은 https://dashboard.ngrok.com/get-started/your-authtoken 에서 확인
+
+# 단일 서버 방식 (프로덕션):
+# - frontend를 빌드(npm run build) 후, backend가 정적 파일 + API 모두 서빙
+# - backend(3000)만 ngrok으로 노출하면 됨
+#
+# 사용법:
+# 1. cd frontend && npm run build
+# 2. cd backend && npm start
+# 3. ngrok http 3000 (또는 ngrok start --config=ngrok.yml)
+
+authtoken: YOUR_AUTHTOKEN_HERE
+version: "2"
+tunnels:
+  app:
+    proto: http
+    addr: 3000
+
