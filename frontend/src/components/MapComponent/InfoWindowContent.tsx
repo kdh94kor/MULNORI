@@ -7,7 +7,7 @@ interface InfoWindowContentProps {
         lat: number;
         lot: number;
         pointName: string;
-        tags?: string | { id: number; name: string; tagtype: string; tagStatus: string; }[]; // Can be string or array
+        tags?: { id: number; name: string; tagtype?: string; tagStatus?: string; }[];
         pointStatus: "PENDING" | "APPROVED" | "REJECTED";
     };
     onTagDelete: (pointId: number, tagToDelete: string) => void;
@@ -33,17 +33,9 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ point, onTagDelet
         }
     };
 
-    // tags가 문자열일 수도 있고, 객체 배열일 수도 있음
-    const tagsArray: string[] = (() => {
-        if (!point.tags) return [];
-        if (typeof point.tags === 'string') {
-            return point.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag !== '');
-        }
-        if (Array.isArray(point.tags)) {
-            return point.tags.map((tag: any) => tag.name || tag).filter((tag: string) => tag);
-        }
-        return [];
-    })();
+    const tagsArray: string[] = point.tags
+        ? point.tags.map(tag => tag.name).filter(name => name)
+        : [];
 
     const handleTagAdd = () => {
         if (newTag.trim() && !tagsArray.includes(newTag.trim()) && point.id) {

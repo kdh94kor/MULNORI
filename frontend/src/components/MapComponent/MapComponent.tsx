@@ -4,7 +4,6 @@ import InfoPanel from '../InfoPanel/InfoPanel';
 import { fetchDivePointMst } from '../../utils/api';
 import InfoWindowContent from './InfoWindowContent';
 import ReactDOM from 'react-dom/client';
-import type { components } from '../../types/api';
 import Swal from 'sweetalert2';
 
 //DivePoint entity와는 구조를 다르게 가자
@@ -23,7 +22,23 @@ interface DivePoint {
     lastScr: number;
 }
 
-type DivePointMst = components['schemas']['DivePointMst'];
+// 태그 인터페이스 (실제 API 응답에 맞춤)
+interface DiveTagMst {
+    id: number;
+    name: string;
+    tagtype?: string;
+    tagStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+// DivePointMst 인터페이스 (실제 API 응답에 맞춤)
+interface DivePointMst {
+    id: number;
+    lat: number;
+    lot: number;
+    pointName: string;
+    tags: DiveTagMst[];
+    pointStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
 
 declare global {
     interface Window {
@@ -91,29 +106,35 @@ const MapComponent: React.FC<MapComponentProps> = ({ kakaoMapKey, seaConditionDa
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ tagToDelete }),
+                body: JSON.stringify({ tagToDelete: tagToDelete }),
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '태그 삭제 실패');
+                throw new Error(result.message || '태그 삭제 요청에 실패했습니다.');
             }
 
             setDivePointMsts(prevMsts =>
                 prevMsts.map(point => {
                     if (point.id !== pointId) return point;
                     
-                    // tags가 문자열인 경우
-                    if (typeof point.tags === 'string') {
+                    // tags가 배열인 경우 삭제된 태그 필터링
+                    if (Array.isArray(point.tags)) {
                         return { 
                             ...point, 
-                            tags: point.tags.split(',').filter(tag => tag.trim() !== tagToDelete).join(',') 
+                            tags: point.tags.filter(tag => tag.name !== tagToDelete)
                         };
                     }
-                    // tags가 배열인 경우 (변경하지 않고 그대로 반환 - 서버에서 새로 가져올 것)
                     return point;
                 })
             );
+
+            // 현재 열려있는 InfoWindow 닫기 (마커 재클릭 시 업데이트된 내용 표시)
+            if (window.currentInfoWindow) {
+                window.currentInfoWindow.close();
+            }
+
             Swal.fire({ title: '다이빙 가보자고', text: '태그가 성공적으로 삭제되었습니다.', icon: 'success' });
 
         } catch (error: any) {

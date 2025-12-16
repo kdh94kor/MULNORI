@@ -15,7 +15,6 @@ router.post('/deletion-requests', async (req: Request, res: Response) => {
             return res.status(400).json({ message: '다이빙포인트 ID와 태그 이름은 필수 항목입니다.' });
         }
 
-        // Check if the DivePointMst actually exists
         const divePointRepo = AppDataSource.getRepository(DivePointMst);
         const divePoint = await divePointRepo.findOne({
             where: { id: divePointId },
@@ -25,9 +24,8 @@ router.post('/deletion-requests', async (req: Request, res: Response) => {
             return res.status(404).json({ message: '해당 다이빙포인트를 찾을 수 없습니다.' });
         }
 
-        // Check if the tag to be deleted actually exists on the point
-        const existingTags = divePoint.tags.map(tag => tag.name);
-        if (!existingTags.includes(tagName)) {
+        const tagExists = divePoint.tags?.some(tag => tag.name === tagName);
+        if (!tagExists) {
             return res.status(404).json({ message: '삭제하려는 태그가 해당 포인트에 존재하지 않습니다.' });
         }
 
@@ -44,7 +42,6 @@ router.post('/deletion-requests', async (req: Request, res: Response) => {
             deletionRequest.requestCount += 1;
             await deletionRepo.save(deletionRequest);
         } else {
-            // If it does not exist, create a new one
             deletionRequest = new TagDeletionRequest();
             deletionRequest.divePointId = divePointId;
             deletionRequest.tagName = tagName;
